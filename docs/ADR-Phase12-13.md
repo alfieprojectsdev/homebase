@@ -1,9 +1,3 @@
-**YES. But strategically.**
-
-Not "let's add AI now." But "let's architect so JARVIS is inevitable."
-
----
-
 ## The JARVIS Endgame (Not for Phase 1, but the North Star)
 
 **What JARVIS actually means for Homebase:**
