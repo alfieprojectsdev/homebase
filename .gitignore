@@ -19,8 +19,8 @@
 # misc
 .DS_Store
 *.pem
-homebase-adr-complete-2025-01-08_files/*
-homebase-adr-complete-2025-01-08.html
+/docs/homebase-adr-complete-2025-01-08_files/
+/docs/homebase-adr-complete-2025-01-08.html
 neondbcreds.md
 
 # debug
