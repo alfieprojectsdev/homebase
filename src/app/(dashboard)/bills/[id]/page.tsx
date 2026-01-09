@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getAuthHeaders } from '@/lib/auth/headers';
 
 interface Bill {
   id: number;
@@ -25,7 +24,10 @@ export default function BillPage() {
     const fetchBill = async () => {
       try {
         const response = await fetch(`/api/bills/${billId}`, {
-          headers: getAuthHeaders(),
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: document.cookie.includes('token=') ? document.cookie : '',
+          },
         });
         const data = await response.json();
 

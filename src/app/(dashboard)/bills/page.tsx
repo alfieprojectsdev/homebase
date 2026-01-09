@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getAuthHeaders } from '@/lib/auth/headers';
 
 interface Bill {
   id: number;
@@ -24,8 +23,11 @@ export default function BillsPage() {
   const fetchBills = async () => {
     try {
       const response = await fetch('/api/bills', {
-        headers: getAuthHeaders(),
-      });
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: document.cookie.includes('token=') ? document.cookie : '',
+        },
+      };
       const data = await response.json();
 
       if (!response.ok) {
@@ -42,14 +44,16 @@ export default function BillsPage() {
 
   useEffect(() => {
     fetchBills();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePay = async (id: number) => {
     try {
       const response = await fetch(`/api/bills/${id}/pay`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: document.cookie.includes('token=') ? document.cookie : '',
+        },
       });
 
       if (!response.ok) {
@@ -70,7 +74,10 @@ export default function BillsPage() {
     try {
       const response = await fetch(`/api/bills/${id}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: document.cookie.includes('token=') ? document.cookie : '',
+        },
       });
 
       if (!response.ok) {

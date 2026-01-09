@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuthHeaders } from '@/lib/auth/headers';
 
 export default function SignupPage() {
   const router = useRouter();

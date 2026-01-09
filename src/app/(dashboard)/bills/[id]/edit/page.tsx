@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getAuthHeaders } from '@/lib/auth/headers';
 
 interface Bill {
   id: number;
@@ -31,7 +30,10 @@ export default function EditBillPage() {
     const fetchBill = async () => {
       try {
         const response = await fetch(`/api/bills/${billId}`, {
-          headers: getAuthHeaders(),
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: document.cookie.includes('token=') ? document.cookie : '',
+          },
         });
         const data = await response.json();
 
@@ -68,13 +70,14 @@ export default function EditBillPage() {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/bills/${billId}`, {
-        method: 'PUT',
-        headers: {
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify(formData),
-      });
+        const response = await fetch(`/api/bills/${billId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: document.cookie.includes('token=') ? document.cookie : '',
+          },
+          body: JSON.stringify(formData),
+        });
 
       const data = await response.json();
 
