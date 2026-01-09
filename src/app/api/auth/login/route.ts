@@ -5,6 +5,9 @@ import { verifyPassword } from '@/lib/auth/password';
 import { createToken } from '@/lib/auth/jwt';
 import { eq } from 'drizzle-orm';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
