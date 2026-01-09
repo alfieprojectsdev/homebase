@@ -4,6 +4,39 @@ import { financialObligations } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getAuthUser } from '@/lib/auth/server';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const authUser = await getAuthUser(request);
+
+  if (!authUser) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const [bill] = await db
+      .select()
+      .from(financialObligations)
+      .where(
+        and(
+          eq(financialObligations.id, parseInt(params.id)),
+          eq(financialObligations.orgId, authUser.orgId)
+        )
+      )
+      .limit(1);
+
+    if (!bill) {
+      return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ bill });
+  } catch (error) {
+    console.error('Get bill error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }

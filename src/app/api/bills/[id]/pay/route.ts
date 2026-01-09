@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { financialObligations } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { getAuthUser } from '@/lib/auth/server';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const orgId = request.headers.get('x-org-id');
+    const authUser = await getAuthUser(request);
 
-    if (!orgId) {
+    if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -24,7 +25,7 @@ export async function POST(
       .where(
         and(
           eq(financialObligations.id, parseInt(params.id)),
-          eq(financialObligations.orgId, parseInt(orgId))
+          eq(financialObligations.orgId, authUser.orgId)
         )
       )
       .returning();

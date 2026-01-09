@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { verifyToken } from './jwt';
 
 export async function getAuthUser(request: NextRequest) {

@@ -1,19 +1,59 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getAuthHeaders } from '@/lib/auth/headers';
 
-export default function NewBillPage() {
+interface Bill {
+  id: number;
+  name: string;
+  amount: string;
+  dueDate: string;
+  status: 'pending' | 'paid' | 'overdue';
+}
+
+export default function EditBillPage() {
   const router = useRouter();
+  const params = useParams();
+  const billId = params.id as string;
+  const [bill, setBill] = useState<Bill | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
     dueDate: '',
   });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchBill = async () => {
+      try {
+        const response = await fetch(`/api/bills/${billId}`, {
+          headers: getAuthHeaders(),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch bill');
+        }
+
+        setBill(data.bill);
+        setFormData({
+          name: data.bill.name,
+          amount: data.bill.amount,
+          dueDate: data.bill.dueDate.split('T')[0],
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch bill');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBill();
+  }, [billId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -25,11 +65,11 @@ export default function NewBillPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setSubmitting(true);
 
     try {
-      const response = await fetch('/api/bills', {
-        method: 'POST',
+      const response = await fetch(`/api/bills/${billId}`, {
+        method: 'PUT',
         headers: {
           ...getAuthHeaders(),
         },
@@ -39,17 +79,38 @@ export default function NewBillPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create bill');
-        setLoading(false);
+        setError(data.error || 'Failed to update bill');
+        setSubmitting(false);
         return;
       }
 
       router.push('/bills');
     } catch {
       setError('An error occurred. Please try again.');
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600 text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !bill) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-lg mb-4">{error || 'Bill not found'}</div>
+          <Link href="/bills" className="text-indigo-600 hover:text-indigo-800 text-lg font-medium">
+            Back to Bills
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
@@ -64,7 +125,7 @@ export default function NewBillPage() {
         </div>
 
         <div className="bg-white shadow-lg rounded-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Add New Bill</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Bill</h1>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">
@@ -128,7 +189,7 @@ export default function NewBillPage() {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard/bills')}
+                onClick={() => router.push('/bills')}
                 className="flex-1 bg-gray-200 text-gray-800 py-4 px-4 border border-transparent text-lg font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 style={{ minHeight: '48px' }}
               >
@@ -136,11 +197,11 @@ export default function NewBillPage() {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={submitting}
                 className="flex-1 bg-indigo-600 text-white py-4 px-4 border border-transparent text-lg font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ minHeight: '48px' }}
               >
-                {loading ? 'Creating...' : 'Create Bill'}
+                {submitting ? 'Updating...' : 'Update Bill'}
               </button>
             </div>
           </form>

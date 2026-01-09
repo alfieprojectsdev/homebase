@@ -11,6 +11,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -24,6 +25,8 @@ export default function DashboardLayout({
       }
     } catch {
       router.push('/login');
+    } finally {
+      setLoading(false);
     }
   }, [router]);
 
@@ -51,7 +54,9 @@ export default function DashboardLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold text-gray-900">Homebase</h1>
-            {user && (
+            {loading ? (
+              <div className="text-gray-700">Loading...</div>
+            ) : user && (
               <div className="flex items-center gap-4">
                 <span className="text-gray-700">{user.name}</span>
                 <button
