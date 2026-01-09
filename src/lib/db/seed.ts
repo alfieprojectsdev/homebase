@@ -8,29 +8,29 @@ async function seed() {
   const [org] = await db
     .insert(organizations)
     .values({
-      name: 'Dev Family',
+      name: 'Sample Family',
     })
     .returning();
 
   console.log(`✅ Created organization: ${org.name} (ID: ${org.id})`);
 
-  const [qcResidence, magalangResidence] = await db
+  const [primaryResidence, secondaryResidence] = await db
     .insert(residences)
     .values([
       {
         orgId: org.id,
-        name: 'QC Apartment',
-        address: 'Quezon City, Metro Manila, Philippines',
+        name: 'Primary Residence',
+        address: 'City A, State, Country',
       },
       {
         orgId: org.id,
-        name: 'Magalang House',
-        address: 'Magalang, Pampanga, Philippines',
+        name: 'Secondary Residence',
+        address: 'City B, Region, Country',
       },
     ])
     .returning();
 
-  console.log(`✅ Created 2 residences: ${qcResidence.name}, ${magalangResidence.name}`);
+  console.log(`✅ Created 2 residences: ${primaryResidence.name}, ${secondaryResidence.name}`);
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -38,8 +38,8 @@ async function seed() {
     .insert(users)
     .values({
       orgId: org.id,
-      residenceId: qcResidence.id,
-      email: 'test@devfamily.com',
+      residenceId: primaryResidence.id,
+      email: 'demo@example.com',
       password: hashedPassword,
       name: 'Test User',
       role: 'admin',
@@ -57,25 +57,25 @@ async function seed() {
     .values([
       {
         orgId: org.id,
-        residenceId: qcResidence.id,
+        residenceId: primaryResidence.id,
         name: 'Electricity Bill',
-        amount: '4500.00',
+        amount: '450.00',
         dueDate: threeDaysLater,
         status: 'pending',
       },
       {
         orgId: org.id,
-        residenceId: qcResidence.id,
+        residenceId: primaryResidence.id,
         name: 'Internet Bill',
-        amount: '1299.00',
+        amount: '129.99',
         dueDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
         status: 'overdue',
       },
       {
         orgId: org.id,
-        residenceId: magalangResidence.id,
+        residenceId: secondaryResidence.id,
         name: 'Water Bill',
-        amount: '850.00',
+        amount: '85.00',
         dueDate: tenDaysLater,
         status: 'pending',
       },
@@ -84,12 +84,12 @@ async function seed() {
 
   console.log(`✅ Created ${bills.length} bills:`);
   bills.forEach((bill) => {
-    console.log(`   - ${bill.name}: ₱${bill.amount} (${bill.status})`);
+    console.log(`   - ${bill.name}: $${bill.amount} (${bill.status})`);
   });
 
   console.log('\n🎉 Database seeded successfully!');
   console.log('\n📝 Test credentials:');
-  console.log('   Email: test@devfamily.com');
+  console.log('   Email: demo@example.com');
   console.log('   Password: password123');
   process.exit(0);
 }

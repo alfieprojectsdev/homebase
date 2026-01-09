@@ -40,6 +40,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Validate amount is positive number
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0 || amountNum > 999999999) {
+      return NextResponse.json({ error: 'Amount must be a positive number less than 1 billion' }, { status: 400 });
+    }
+
+    // Validate dueDate is valid date
+    const dueDateObj = new Date(dueDate);
+    if (isNaN(dueDateObj.getTime())) {
+      return NextResponse.json({ error: 'Invalid due date' }, { status: 400 });
+    }
+
     const [bill] = await db
       .insert(financialObligations)
       .values({

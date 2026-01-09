@@ -33,7 +33,7 @@ Homebase prioritizes **reliability over features**. A simple bill tracker that w
 - ✅ ADHD-optimized visual urgency system (color-coded by days until due)
 - ✅ Authentication with row-level security
 - ✅ Mobile-first responsive design
-- ✅ Philippine locale support (₱ PHP, Manila timezone)
+- ✅ Multi-currency support (USD/EUR/etc, configurable timezone)
 
 ### Phase 2-4 (In Progress)
 - 🚧 Mission-critical push notifications with SMS fallback
@@ -134,7 +134,7 @@ vercel
 
 ```
 organizations (family units)
-  ├── residences (QC House, Magalang Property, etc.)
+  ├── residences (Urban Home, Rural Property, etc.)
   ├── users (family members)
   └── financial_obligations (bills, rent, taxes, insurance)
 ```
@@ -154,17 +154,17 @@ Full schema: See [`/docs/ADR.md`](./docs/ADR.md)
 
 ### 1. Prevent Utility Disconnections
 
-**Problem:** Forgot PELCO bill → power cut → food spoiled → emergency trip during typhoon
+**Problem:** Forgot electric bill → power cut → food spoiled → emergency trip during storm
 
 **Solution:**
-- 14 days before: "PELCO due in 2 weeks - calendar it"
-- 7 days before: "PELCO critical - plan Magalang trip"
-- 3 days before: "PELCO + typhoon forecast = URGENT: pay early"
+- 14 days before: "Electric bill due in 2 weeks - calendar it"
+- 7 days before: "Electric bill critical - plan remote property trip"
+- 3 days before: "Electric bill + storm forecast = URGENT: pay early"
 - If unacknowledged: SMS + spouse notification
 
 ### 2. Multi-Residence Context Awareness
 
-**Problem:** At QC residence, forgetting about Magalang bills/maintenance
+**Problem:** At urban residence, forgetting about rural property bills/maintenance
 
 **Solution:**
 - Bills tagged by residence
@@ -176,7 +176,7 @@ Full schema: See [`/docs/ADR.md`](./docs/ADR.md)
 **Problem:** Needs equal visibility without "checking up on you" dynamics
 
 **Solution:**
-- Shared activity feed: "X paid MERALCO"
+- Shared activity feed: "X paid electric company"
 - Contribution summary (not tracking, just transparency)
 - Spouse receives escalation only for critical unacknowledged items
 
@@ -300,7 +300,7 @@ See full guide in [`/docs/ADR.md`](./docs/ADR.md), but in short:
 - [ ] Logout clears session
 
 # Bills CRUD
-- [ ] Can add bill (MERALCO, PELCO, etc.)
+- [ ] Can add bill (Electric, Water, Internet, etc.)
 - [ ] Bills list shows correct urgency colors
 - [ ] Overdue bills appear at top
 - [ ] Can mark bill as paid

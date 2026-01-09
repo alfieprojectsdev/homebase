@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getAuthHeaders } from '@/lib/auth/headers';
 
 interface Bill {
   id: number;
@@ -18,20 +19,7 @@ export default function BillsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const getAuthHeaders = () => {
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-      const [key, value] = cookie.trim().split('=');
-      if (key && value) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as Record<string, string>);
 
-    return {
-      'Content-Type': 'application/json',
-      ...(cookies.token ? { Cookie: `token=${cookies.token}` } : {}),
-    };
-  };
 
   const fetchBills = async () => {
     try {
@@ -54,6 +42,7 @@ export default function BillsPage() {
 
   useEffect(() => {
     fetchBills();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePay = async (id: number) => {
@@ -104,11 +93,11 @@ export default function BillsPage() {
     const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysUntilDue < 0) {
-      return 'bg-red-100 border-red-200 text-red-800';
+      return 'bg-red-600 border-red-700 text-white';
     } else if (daysUntilDue <= 3) {
-      return 'bg-orange-100 border-orange-200 text-orange-800';
+      return 'bg-orange-500 border-orange-600 text-white';
     } else if (daysUntilDue <= 7) {
-      return 'bg-yellow-100 border-yellow-200 text-yellow-800';
+      return 'bg-yellow-400 border-yellow-500 text-gray-900';
     }
 
     return 'bg-gray-50 border-gray-200 text-gray-800';
@@ -116,18 +105,18 @@ export default function BillsPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-PH', {
+    return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      timeZone: 'Asia/Manila',
+      timeZone: 'UTC',
     }).format(date);
   };
 
   const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat('en-PH', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'PHP',
+      currency: 'USD',
     }).format(parseFloat(amount));
   };
 

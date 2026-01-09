@@ -30,7 +30,9 @@ export default function SignupPage() {
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(formData),
       });
 

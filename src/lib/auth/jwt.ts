@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify, JWTPayload as JoseJWTPayload } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
-);
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export interface JWTPayload extends JoseJWTPayload {
   userId: number;
