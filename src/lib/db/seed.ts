@@ -1,6 +1,6 @@
 import { db } from './index';
 import { organizations, residences, users, financialObligations } from './schema';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 async function seed() {
   console.log('🌱 Seeding database...');
