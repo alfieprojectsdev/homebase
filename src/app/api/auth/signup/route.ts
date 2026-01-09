@@ -6,7 +6,6 @@ import { createToken } from '@/lib/auth/jwt';
 import { eq } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
