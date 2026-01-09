@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuthHeaders } from '@/lib/auth/headers';
 
 export default function DashboardLayout({
   children,
@@ -38,7 +37,10 @@ export default function DashboardLayout({
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
-        headers: getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     } catch {
       console.error('Logout error');

@@ -30,9 +30,9 @@ export default function EditBillPage() {
     const fetchBill = async () => {
       try {
         const response = await fetch(`/api/bills/${billId}`, {
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: document.cookie.includes('token=') ? document.cookie : '',
           },
         });
         const data = await response.json();
@@ -72,9 +72,9 @@ export default function EditBillPage() {
     try {
         const response = await fetch(`/api/bills/${billId}`, {
           method: 'PUT',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: document.cookie.includes('token=') ? document.cookie : '',
           },
           body: JSON.stringify(formData),
         });

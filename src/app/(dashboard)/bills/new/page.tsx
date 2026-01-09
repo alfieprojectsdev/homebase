@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getAuthHeaders } from '@/lib/auth/headers';
 
 export default function NewBillPage() {
   const router = useRouter();
@@ -30,8 +29,9 @@ export default function NewBillPage() {
     try {
       const response = await fetch('/api/bills', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });

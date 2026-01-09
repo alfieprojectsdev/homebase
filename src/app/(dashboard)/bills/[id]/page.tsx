@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface Bill {
@@ -13,7 +13,6 @@ interface Bill {
 }
 
 export default function BillPage() {
-  const router = useRouter();
   const params = useParams();
   const billId = params.id as string;
   const [bill, setBill] = useState<Bill | null>(null);
@@ -24,9 +23,9 @@ export default function BillPage() {
     const fetchBill = async () => {
       try {
         const response = await fetch(`/api/bills/${billId}`, {
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: document.cookie.includes('token=') ? document.cookie : '',
           },
         });
         const data = await response.json();
@@ -107,7 +106,10 @@ export default function BillPage() {
     try {
       const response = await fetch(`/api/bills/${billId}/pay`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -115,7 +117,10 @@ export default function BillPage() {
       }
 
       const getResponse = await fetch(`/api/bills/${billId}`, {
-        headers: getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       const getData = await getResponse.json();
       setBill(getData.bill);
