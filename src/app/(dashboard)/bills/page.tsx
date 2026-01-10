@@ -10,6 +10,9 @@ interface Bill {
   dueDate: string;
   status: 'pending' | 'paid' | 'overdue';
   residenceId: number | null;
+  recurrenceEnabled: boolean;
+  recurrenceFrequency: string | null;
+  recurrenceInterval: number | null;
 }
 
 export default function BillsPage() {
@@ -216,13 +219,20 @@ export default function BillsPage() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <Link
-                      href={`/bills/${bill.id}`}
-                      className="hover:underline inline-block"
-                      style={{ minHeight: '44px' }}
-                    >
-                      <h3 className="text-xl font-bold mb-1">{bill.name}</h3>
-                    </Link>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Link
+                        href={`/bills/${bill.id}`}
+                        className="hover:underline inline-block"
+                        style={{ minHeight: '44px' }}
+                      >
+                        <h3 className="text-xl font-bold">{bill.name}</h3>
+                      </Link>
+                      {bill.recurrenceEnabled && (
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600">
+                          🔄 Recurring
+                        </span>
+                      )}
+                    </div>
                     <p className="text-lg font-semibold">{formatCurrency(bill.amount)}</p>
                   </div>
                   <div className="text-right">
