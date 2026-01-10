@@ -51,10 +51,52 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { name, amount, dueDate, residenceId } = body;
+    const {
+      name,
+      amount,
+      dueDate,
+      residenceId,
+      recurrenceEnabled,
+      recurrenceFrequency,
+      recurrenceInterval,
+      recurrenceDayOfMonth
+    } = body;
 
     if (!name || !amount || !dueDate) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Validate amount is positive number
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0 || amountNum > 999999999) {
+      return NextResponse.json({ error: 'Amount must be a positive number less than 1 billion' }, { status: 400 });
+    }
+
+    // Validate dueDate is valid date
+    const dueDateObj = new Date(dueDate);
+    if (isNaN(dueDateObj.getTime())) {
+      return NextResponse.json({ error: 'Invalid due date' }, { status: 400 });
+    }
+
+    // Validate recurrence settings if enabled
+    let validatedInterval = 1;
+    if (recurrenceEnabled) {
+      const validFrequencies = ['monthly', 'quarterly', 'biannual', 'annual'];
+      if (recurrenceFrequency && !validFrequencies.includes(recurrenceFrequency)) {
+        return NextResponse.json({ error: 'Invalid recurrence frequency' }, { status: 400 });
+      }
+
+      // Validate interval (1-12 reasonable range)
+      const interval = recurrenceInterval || 1;
+      if (interval < 1 || interval > 12) {
+        return NextResponse.json({ error: 'Recurrence interval must be between 1 and 12' }, { status: 400 });
+      }
+      validatedInterval = interval;
+
+      // Validate day of month (1-31)
+      if (recurrenceDayOfMonth && (recurrenceDayOfMonth < 1 || recurrenceDayOfMonth > 31)) {
+        return NextResponse.json({ error: 'Day of month must be between 1 and 31' }, { status: 400 });
+      }
     }
 
     const [bill] = await db
@@ -64,6 +106,10 @@ export async function PUT(
         amount: amount.toString(),
         dueDate: new Date(dueDate),
         residenceId: residenceId ? parseInt(residenceId) : null,
+        recurrenceEnabled: recurrenceEnabled || false,
+        recurrenceFrequency: recurrenceEnabled ? recurrenceFrequency : null,
+        recurrenceInterval: recurrenceEnabled ? validatedInterval : null,
+        recurrenceDayOfMonth: recurrenceEnabled ? recurrenceDayOfMonth : null,
         updatedAt: new Date(),
       })
       .where(

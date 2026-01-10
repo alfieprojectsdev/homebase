@@ -9,6 +9,10 @@ interface Bill {
   amount: string;
   dueDate: string;
   status: 'pending' | 'paid' | 'overdue';
+  residenceId: number | null;
+  recurrenceEnabled: boolean;
+  recurrenceFrequency: string | null;
+  recurrenceInterval: number | null;
 }
 
 export default function BillsPage() {
@@ -85,6 +89,35 @@ export default function BillsPage() {
       fetchBills();
     } catch {
       setError('Failed to delete bill');
+    }
+  };
+
+  const handleDuplicate = async (bill: Bill) => {
+    try {
+      const currentDue = new Date(bill.dueDate);
+      const nextDue = new Date(currentDue);
+      nextDue.setMonth(nextDue.getMonth() + 1);
+
+      const response = await fetch('/api/bills', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: bill.name,
+          amount: bill.amount,
+          dueDate: nextDue.toISOString(),
+          residenceId: bill.residenceId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to duplicate bill');
+      }
+
+      alert(`✓ Created ${bill.name} for ${nextDue.toLocaleDateString()}`);
+      fetchBills();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to duplicate bill');
     }
   };
 
@@ -186,13 +219,20 @@ export default function BillsPage() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <Link
-                      href={`/bills/${bill.id}`}
-                      className="hover:underline inline-block"
-                      style={{ minHeight: '44px' }}
-                    >
-                      <h3 className="text-xl font-bold mb-1">{bill.name}</h3>
-                    </Link>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Link
+                        href={`/bills/${bill.id}`}
+                        className="hover:underline inline-block"
+                        style={{ minHeight: '44px' }}
+                      >
+                        <h3 className="text-xl font-bold">{bill.name}</h3>
+                      </Link>
+                      {bill.recurrenceEnabled && (
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600">
+                          🔄 Recurring
+                        </span>
+                      )}
+                    </div>
                     <p className="text-lg font-semibold">{formatCurrency(bill.amount)}</p>
                   </div>
                   <div className="text-right">
@@ -211,6 +251,13 @@ export default function BillsPage() {
                       Mark as Paid
                     </button>
                   )}
+                  <button
+                    onClick={() => handleDuplicate(bill)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
+                    style={{ minHeight: '44px' }}
+                  >
+                    🔄 Next Month
+                  </button>
                   <Link
                     href={`/bills/${bill.id}/edit`}
                     className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors inline-block"

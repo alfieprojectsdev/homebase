@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import RecurrenceSelector from '@/components/RecurrenceSelector';
 
 interface Bill {
   id: number;
@@ -10,6 +11,10 @@ interface Bill {
   amount: string;
   dueDate: string;
   status: 'pending' | 'paid' | 'overdue';
+  recurrenceEnabled: boolean;
+  recurrenceFrequency: string | null;
+  recurrenceInterval: number | null;
+  recurrenceDayOfMonth: number | null;
 }
 
 export default function EditBillPage() {
@@ -21,6 +26,16 @@ export default function EditBillPage() {
     name: '',
     amount: '',
     dueDate: '',
+  });
+  const [recurrence, setRecurrence] = useState<{
+    enabled: boolean;
+    frequency: string;
+    interval: number;
+    dayOfMonth?: number;
+  }>({
+    enabled: false,
+    frequency: 'monthly',
+    interval: 1,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,6 +61,12 @@ export default function EditBillPage() {
           name: data.bill.name,
           amount: data.bill.amount,
           dueDate: data.bill.dueDate.split('T')[0],
+        });
+        setRecurrence({
+          enabled: data.bill.recurrenceEnabled || false,
+          frequency: data.bill.recurrenceFrequency || 'monthly',
+          interval: data.bill.recurrenceInterval || 1,
+          dayOfMonth: data.bill.recurrenceDayOfMonth || undefined,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch bill');
@@ -76,7 +97,13 @@ export default function EditBillPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            recurrenceEnabled: recurrence.enabled,
+            recurrenceFrequency: recurrence.frequency,
+            recurrenceInterval: recurrence.interval,
+            recurrenceDayOfMonth: recurrence.dayOfMonth,
+          }),
         });
 
       const data = await response.json();
@@ -188,6 +215,14 @@ export default function EditBillPage() {
                 style={{ minHeight: '44px' }}
               />
             </div>
+
+            <RecurrenceSelector
+              enabled={recurrence.enabled}
+              frequency={recurrence.frequency}
+              interval={recurrence.interval}
+              dayOfMonth={recurrence.dayOfMonth}
+              onUpdate={setRecurrence}
+            />
 
             <div className="flex gap-4">
               <button
