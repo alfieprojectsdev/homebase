@@ -9,6 +9,7 @@ interface Bill {
   amount: string;
   dueDate: string;
   status: 'pending' | 'paid' | 'overdue';
+  residenceId: number | null;
 }
 
 export default function BillsPage() {
@@ -85,6 +86,35 @@ export default function BillsPage() {
       fetchBills();
     } catch {
       setError('Failed to delete bill');
+    }
+  };
+
+  const handleDuplicate = async (bill: Bill) => {
+    try {
+      const currentDue = new Date(bill.dueDate);
+      const nextDue = new Date(currentDue);
+      nextDue.setMonth(nextDue.getMonth() + 1);
+
+      const response = await fetch('/api/bills', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: bill.name,
+          amount: bill.amount,
+          dueDate: nextDue.toISOString(),
+          residenceId: bill.residenceId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to duplicate bill');
+      }
+
+      alert(`✓ Created ${bill.name} for ${nextDue.toLocaleDateString()}`);
+      fetchBills();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to duplicate bill');
     }
   };
 
@@ -211,6 +241,13 @@ export default function BillsPage() {
                       Mark as Paid
                     </button>
                   )}
+                  <button
+                    onClick={() => handleDuplicate(bill)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
+                    style={{ minHeight: '44px' }}
+                  >
+                    🔄 Next Month
+                  </button>
                   <Link
                     href={`/bills/${bill.id}/edit`}
                     className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors inline-block"
