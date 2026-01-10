@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, decimal, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, decimal, integer, boolean } from 'drizzle-orm/pg-core';
 
 export const organizations = pgTable('organizations', {
   id: serial('id').primaryKey(),
@@ -36,6 +36,13 @@ export const financialObligations = pgTable('financial_obligations', {
   dueDate: timestamp('due_date').notNull(),
   status: varchar('status', { length: 50, enum: ['pending', 'paid', 'overdue'] }).default('pending').notNull(),
   paidAt: timestamp('paid_at'),
+  recurrenceEnabled: boolean('recurrence_enabled').default(false).notNull(),
+  recurrenceFrequency: varchar('recurrence_frequency', {
+    length: 20,
+  }).$type<'monthly' | 'quarterly' | 'biannual' | 'annual' | null>(),
+  recurrenceInterval: integer('recurrence_interval').default(1),
+  recurrenceDayOfMonth: integer('recurrence_day_of_month'),
+  parentBillId: integer('parent_bill_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
