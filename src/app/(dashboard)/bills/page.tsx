@@ -177,7 +177,7 @@ export default function BillsPage() {
 
         {bills.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No bills yet. Add your first bill!</p>
+            <p className="text-gray-600 text-lg">No bills yet. Click the button above to get started!</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -188,7 +188,13 @@ export default function BillsPage() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-xl font-bold mb-1">{bill.name}</h3>
+                    <Link
+                      href={`/bills/${bill.id}`}
+                      className="hover:underline inline-block"
+                      style={{ minHeight: '44px' }}
+                    >
+                      <h3 className="text-xl font-bold mb-1">{bill.name}</h3>
+                    </Link>
                     <p className="text-lg font-semibold">{formatCurrency(bill.amount)}</p>
                   </div>
                   <div className="text-right">
@@ -197,8 +203,8 @@ export default function BillsPage() {
                   </div>
                 </div>
 
-                {bill.status === 'pending' && (
-                  <div className="mt-4 flex gap-3">
+                <div className="mt-4 flex gap-3">
+                  {bill.status === 'pending' && (
                     <button
                       onClick={() => handlePay(bill.id)}
                       className="bg-green-600 text-white px-4 py-2 rounded font-medium hover:bg-green-700 transition-colors"
@@ -206,22 +212,22 @@ export default function BillsPage() {
                     >
                       Mark as Paid
                     </button>
-                    <button
-                      onClick={() => router.push(`/bills/${bill.id}/edit`)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
-                      style={{ minHeight: '44px' }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(bill.id)}
-                      className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition-colors"
-                      style={{ minHeight: '44px' }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+                  )}
+                  <button
+                    onClick={() => router.push(`/bills/${bill.id}/edit`)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
+                    style={{ minHeight: '44px' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(bill.id)}
+                    className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition-colors"
+                    style={{ minHeight: '44px' }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

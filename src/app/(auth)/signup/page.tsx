@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
@@ -13,6 +13,26 @@ export default function SignupPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check if user is already authenticated and redirect silently
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          // User is authenticated, redirect to bills
+          router.replace('/bills');
+        }
+      } catch {
+        // User is not authenticated, continue showing signup page
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

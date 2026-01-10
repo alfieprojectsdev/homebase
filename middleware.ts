@@ -33,7 +33,10 @@ export async function middleware(request: NextRequest) {
     if (token) {
       const payload = await verifyToken(token);
       if (payload) {
-        return NextResponse.redirect(new URL('/bills', request.url));
+        const response = NextResponse.redirect(new URL('/bills', request.url));
+        // Prevent caching to ensure redirect always happens
+        response.headers.set('Cache-Control', 'no-store, max-age=0');
+        return response;
       }
     }
   }
