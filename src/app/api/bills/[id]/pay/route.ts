@@ -62,22 +62,45 @@ export async function POST(
         currentBill.recurrenceDayOfMonth || undefined
       );
 
-      [nextBill] = await db
-        .insert(financialObligations)
-        .values({
-          orgId: currentBill.orgId,
-          residenceId: currentBill.residenceId,
-          name: currentBill.name,
-          amount: currentBill.amount,
-          dueDate: nextDueDate,
-          status: 'pending',
-          recurrenceEnabled: true,
-          recurrenceFrequency: currentBill.recurrenceFrequency,
-          recurrenceInterval: currentBill.recurrenceInterval,
-          recurrenceDayOfMonth: currentBill.recurrenceDayOfMonth,
-          parentBillId: currentBill.id,
-        })
-        .returning();
+      // Check if next occurrence already exists (prevent duplicate on double-click)
+      const whereConditions = [
+        eq(financialObligations.orgId, currentBill.orgId),
+        eq(financialObligations.name, currentBill.name),
+        eq(financialObligations.dueDate, nextDueDate),
+        eq(financialObligations.status, 'pending'),
+      ];
+
+      // Handle nullable residenceId
+      if (currentBill.residenceId !== null) {
+        whereConditions.push(eq(financialObligations.residenceId, currentBill.residenceId));
+      }
+
+      const [existingNext] = await db
+        .select()
+        .from(financialObligations)
+        .where(and(...whereConditions))
+        .limit(1);
+
+      if (!existingNext) {
+        [nextBill] = await db
+          .insert(financialObligations)
+          .values({
+            orgId: currentBill.orgId,
+            residenceId: currentBill.residenceId,
+            name: currentBill.name,
+            amount: currentBill.amount,
+            dueDate: nextDueDate,
+            status: 'pending',
+            recurrenceEnabled: true,
+            recurrenceFrequency: currentBill.recurrenceFrequency,
+            recurrenceInterval: currentBill.recurrenceInterval,
+            recurrenceDayOfMonth: currentBill.recurrenceDayOfMonth,
+            parentBillId: currentBill.id,
+          })
+          .returning();
+      } else {
+        nextBill = existingNext; // Return existing bill instead
+      }
     }
 
     return NextResponse.json({
