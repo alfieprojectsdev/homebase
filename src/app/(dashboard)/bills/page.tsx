@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface Bill {
@@ -13,7 +12,6 @@ interface Bill {
 }
 
 export default function BillsPage() {
-  const router = useRouter();
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -213,13 +211,13 @@ export default function BillsPage() {
                       Mark as Paid
                     </button>
                   )}
-                  <button
-                    onClick={() => router.push(`/bills/${bill.id}/edit`)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
+                  <Link
+                    href={`/bills/${bill.id}/edit`}
+                    className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors inline-block"
                     style={{ minHeight: '44px' }}
                   >
                     Edit
-                  </button>
+                  </Link>
                   <button
                     onClick={() => handleDelete(bill.id)}
                     className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition-colors"
