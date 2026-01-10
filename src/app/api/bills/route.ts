@@ -36,7 +36,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, amount, dueDate, residenceId } = body;
+    const {
+      name,
+      amount,
+      dueDate,
+      residenceId,
+      recurrenceEnabled,
+      recurrenceFrequency,
+      recurrenceInterval,
+      recurrenceDayOfMonth
+    } = body;
 
     if (!name || !amount || !dueDate) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -63,6 +72,12 @@ export async function POST(request: NextRequest) {
         amount: amount.toString(),
         dueDate: new Date(dueDate),
         status: 'pending',
+
+        // Recurrence fields (Phase 1.5B)
+        recurrenceEnabled: recurrenceEnabled || false,
+        recurrenceFrequency: recurrenceEnabled ? recurrenceFrequency : null,
+        recurrenceInterval: recurrenceEnabled ? (recurrenceInterval || 1) : null,
+        recurrenceDayOfMonth: recurrenceEnabled ? recurrenceDayOfMonth : null,
       })
       .returning();
 
