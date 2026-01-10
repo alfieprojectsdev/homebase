@@ -63,6 +63,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid due date' }, { status: 400 });
     }
 
+    // Validate recurrence settings if enabled
+    let validatedInterval = 1;
+    if (recurrenceEnabled) {
+      const validFrequencies = ['monthly', 'quarterly', 'biannual', 'annual'];
+      if (recurrenceFrequency && !validFrequencies.includes(recurrenceFrequency)) {
+        return NextResponse.json({ error: 'Invalid recurrence frequency' }, { status: 400 });
+      }
+
+      // Validate interval (1-12 reasonable range)
+      const interval = recurrenceInterval || 1;
+      if (interval < 1 || interval > 12) {
+        return NextResponse.json({ error: 'Recurrence interval must be between 1 and 12' }, { status: 400 });
+      }
+      validatedInterval = interval;
+
+      // Validate day of month (1-31)
+      if (recurrenceDayOfMonth && (recurrenceDayOfMonth < 1 || recurrenceDayOfMonth > 31)) {
+        return NextResponse.json({ error: 'Day of month must be between 1 and 31' }, { status: 400 });
+      }
+    }
+
     const [bill] = await db
       .insert(financialObligations)
       .values({
@@ -76,7 +97,7 @@ export async function POST(request: NextRequest) {
         // Recurrence fields (Phase 1.5B)
         recurrenceEnabled: recurrenceEnabled || false,
         recurrenceFrequency: recurrenceEnabled ? recurrenceFrequency : null,
-        recurrenceInterval: recurrenceEnabled ? (recurrenceInterval || 1) : null,
+        recurrenceInterval: recurrenceEnabled ? validatedInterval : null,
         recurrenceDayOfMonth: recurrenceEnabled ? recurrenceDayOfMonth : null,
       })
       .returning();
