@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import RecurrenceSelector from '@/components/RecurrenceSelector';
 
 export default function NewBillPage() {
   const router = useRouter();
@@ -10,6 +11,16 @@ export default function NewBillPage() {
     name: '',
     amount: '',
     dueDate: '',
+  });
+  const [recurrence, setRecurrence] = useState<{
+    enabled: boolean;
+    frequency: string;
+    interval: number;
+    dayOfMonth?: number;
+  }>({
+    enabled: false,
+    frequency: 'monthly',
+    interval: 1,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +44,13 @@ export default function NewBillPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          recurrenceEnabled: recurrence.enabled,
+          recurrenceFrequency: recurrence.frequency,
+          recurrenceInterval: recurrence.interval,
+          recurrenceDayOfMonth: recurrence.dayOfMonth,
+        }),
       });
 
       const data = await response.json();
@@ -124,6 +141,14 @@ export default function NewBillPage() {
                 style={{ minHeight: '44px' }}
               />
             </div>
+
+            <RecurrenceSelector
+              enabled={recurrence.enabled}
+              frequency={recurrence.frequency}
+              interval={recurrence.interval}
+              dayOfMonth={recurrence.dayOfMonth}
+              onUpdate={setRecurrence}
+            />
 
             <div className="flex gap-4">
               <button
