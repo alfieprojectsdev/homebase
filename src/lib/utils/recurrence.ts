@@ -35,6 +35,21 @@ export function calculateNextDueDate(
   interval: number = 1,
   dayOfMonth?: number
 ): Date {
+  // Validate input date
+  if (isNaN(currentDueDate.getTime())) {
+    throw new Error('Invalid current due date');
+  }
+
+  // Validate interval
+  if (interval < 1 || interval > 12) {
+    throw new Error('Interval must be between 1 and 12');
+  }
+
+  // Validate dayOfMonth if provided
+  if (dayOfMonth !== undefined && (dayOfMonth < 1 || dayOfMonth > 31)) {
+    throw new Error('Day of month must be between 1 and 31');
+  }
+
   const next = new Date(currentDueDate);
   const originalDay = next.getDate();
 
