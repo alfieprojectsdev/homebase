@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
       recurrenceEnabled,
       recurrenceFrequency,
       recurrenceInterval,
-      recurrenceDayOfMonth
+      recurrenceDayOfMonth,
+      accountNumber
     } = body;
 
     if (!name || !amount || !dueDate) {
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
         amount: amount.toString(),
         dueDate: new Date(dueDate),
         status: 'pending',
+        accountNumber: accountNumber || null,
 
         // Recurrence fields (Phase 1.5B)
         recurrenceEnabled: recurrenceEnabled || false,

@@ -1,0 +1,1 @@
+ALTER TABLE "financial_obligations" ADD COLUMN "account_number" varchar(255);
