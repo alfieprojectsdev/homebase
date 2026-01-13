@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import RecurrenceSelector from '@/components/RecurrenceSelector';
+import SmartSuggestions from '@/components/SmartSuggestions';
 
 export default function NewBillPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function NewBillPage() {
     name: '',
     amount: '',
     dueDate: '',
+    accountNumber: '',
   });
   const [recurrence, setRecurrence] = useState<{
     enabled: boolean;
@@ -30,6 +32,10 @@ export default function NewBillPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleSuggestionApply = (billName: string) => {
+    setFormData(prev => ({ ...prev, name: billName }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +95,8 @@ export default function NewBillPage() {
             </div>
           )}
 
+          <SmartSuggestions onApply={handleSuggestionApply} />
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -102,6 +110,22 @@ export default function NewBillPage() {
                 className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-lg"
                 placeholder="e.g., Electricity Bill"
                 value={formData.name}
+                onChange={handleChange}
+                style={{ minHeight: '44px' }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                Account Number / Code (Optional)
+              </label>
+              <input
+                id="accountNumber"
+                name="accountNumber"
+                type="text"
+                className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-lg"
+                placeholder="e.g., 123456789"
+                value={formData.accountNumber}
                 onChange={handleChange}
                 style={{ minHeight: '44px' }}
               />
@@ -153,7 +177,7 @@ export default function NewBillPage() {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard/bills')}
+                onClick={() => router.push('/bills')}
                 className="flex-1 bg-gray-200 text-gray-800 py-4 px-4 border border-transparent text-lg font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 style={{ minHeight: '48px' }}
               >

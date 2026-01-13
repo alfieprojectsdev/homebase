@@ -59,7 +59,8 @@ export async function PUT(
       recurrenceEnabled,
       recurrenceFrequency,
       recurrenceInterval,
-      recurrenceDayOfMonth
+      recurrenceDayOfMonth,
+      accountNumber
     } = body;
 
     if (!name || !amount || !dueDate) {
@@ -110,6 +111,7 @@ export async function PUT(
         recurrenceFrequency: recurrenceEnabled ? recurrenceFrequency : null,
         recurrenceInterval: recurrenceEnabled ? validatedInterval : null,
         recurrenceDayOfMonth: recurrenceEnabled ? recurrenceDayOfMonth : null,
+        accountNumber: accountNumber || null,
         updatedAt: new Date(),
       })
       .where(

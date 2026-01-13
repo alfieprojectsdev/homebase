@@ -15,6 +15,7 @@ interface Bill {
   recurrenceFrequency: string | null;
   recurrenceInterval: number | null;
   recurrenceDayOfMonth: number | null;
+  accountNumber?: string;
 }
 
 export default function EditBillPage() {
@@ -26,6 +27,7 @@ export default function EditBillPage() {
     name: '',
     amount: '',
     dueDate: '',
+    accountNumber: '',
   });
   const [recurrence, setRecurrence] = useState<{
     enabled: boolean;
@@ -61,6 +63,7 @@ export default function EditBillPage() {
           name: data.bill.name,
           amount: data.bill.amount,
           dueDate: data.bill.dueDate.split('T')[0],
+          accountNumber: data.bill.accountNumber || '',
         });
         setRecurrence({
           enabled: data.bill.recurrenceEnabled || false,
@@ -179,6 +182,36 @@ export default function EditBillPage() {
                 onChange={handleChange}
                 style={{ minHeight: '44px' }}
               />
+            </div>
+
+            <div>
+              <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                Account Number / Code (Optional)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="accountNumber"
+                  name="accountNumber"
+                  type="text"
+                  className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-lg"
+                  placeholder="e.g., 123456789"
+                  value={formData.accountNumber}
+                  onChange={handleChange}
+                  style={{ minHeight: '44px' }}
+                />
+                {formData.accountNumber && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(formData.accountNumber);
+                    }}
+                    className="bg-gray-100 px-4 rounded-md border border-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    title="Copy to clipboard"
+                  >
+                    📋
+                  </button>
+                )}
+              </div>
             </div>
 
             <div>
