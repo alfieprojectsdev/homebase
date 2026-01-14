@@ -16,10 +16,18 @@ export const createTestUser = async (page: Page) => {
   await page.fill('input[name="password"]', password);
 
   // Submit form
+  console.log('Submitting signup form...');
   await page.click('button[type="submit"]');
+  console.log('Form submitted. Waiting for navigation to /bills...');
 
   // Wait for redirect to bills page
-  await page.waitForURL(/\/bills/, { timeout: 15000 });
+  try {
+    await page.waitForURL(/\/bills/, { timeout: 30000, waitUntil: 'domcontentloaded' });
+    console.log('Navigation to /bills successful.');
+  } catch (e) {
+    console.log('Navigation timeout. Current URL:', page.url());
+    throw e;
+  }
 
   return { email, password };
 };

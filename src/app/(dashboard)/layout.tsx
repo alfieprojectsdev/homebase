@@ -30,8 +30,13 @@ export default function DashboardLayout({
   }, [router]);
 
   useEffect(() => {
+    console.log('DashboardLayout: Mounted');
     fetchUser();
   }, [fetchUser]);
+
+  useEffect(() => {
+    if (user) console.log('DashboardLayout: User loaded', user.email);
+  }, [user]);
 
   const handleLogout = async () => {
     try {

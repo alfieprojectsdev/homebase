@@ -45,6 +45,7 @@ export default function BillsPage() {
   };
 
   useEffect(() => {
+    console.log('BillsPage: Mounted');
     fetchBills();
   }, []);
 

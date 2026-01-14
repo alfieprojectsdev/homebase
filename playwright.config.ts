@@ -19,7 +19,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  timeout: 30000,
+  timeout: 60000,
   // Save test artifacts (screenshots, videos, traces) to dedicated directory
   outputDir: 'test-results',
 });

@@ -31,10 +31,10 @@ test.describe('Chores CRUD Operations', () => {
     await expect(page.locator(`text=${uniqueChoreName}`)).toBeVisible({ timeout: 10000 });
   });
 
-  test('should update chore progress', async ({ page, request }) => {
+  test('should update chore progress', async ({ page }) => {
     const apiUrl = page.url().split('/chores')[0];
 
-    const createResponse = await request.post(`${apiUrl}/api/chores`, {
+    const createResponse = await page.request.post(`${apiUrl}/api/chores`, {
       data: {
         title: `Progress Test ${Date.now()}`,
         progress: 0,
@@ -47,7 +47,7 @@ test.describe('Chores CRUD Operations', () => {
 
     await page.goto('/chores');
 
-    const updateResponse = await request.patch(`${apiUrl}/api/chores/${choreId}`, {
+    const updateResponse = await page.request.patch(`${apiUrl}/api/chores/${choreId}`, {
       data: {
         progress: 50,
       },
@@ -59,10 +59,10 @@ test.describe('Chores CRUD Operations', () => {
     await expect(page.locator('text="50%"')).toBeVisible({ timeout: 5000 });
   });
 
-  test('should mark chore as complete', async ({ page, request }) => {
+  test('should mark chore as complete', async ({ page }) => {
     const apiUrl = page.url().split('/chores')[0];
 
-    const createResponse = await request.post(`${apiUrl}/api/chores`, {
+    const createResponse = await page.request.post(`${apiUrl}/api/chores`, {
       data: {
         title: `Completion Test ${Date.now()}`,
         progress: 0,
@@ -75,7 +75,7 @@ test.describe('Chores CRUD Operations', () => {
 
     await page.goto('/chores');
 
-    const completeResponse = await request.patch(`${apiUrl}/api/chores/${choreId}`, {
+    const completeResponse = await page.request.patch(`${apiUrl}/api/chores/${choreId}`, {
       data: {
         progress: 100,
       },
@@ -89,10 +89,10 @@ test.describe('Chores CRUD Operations', () => {
     await expect(page.locator('text=bg-green-600')).toBeVisible({ timeout: 5000 });
   });
 
-  test('should delete chore', async ({ page, request }) => {
+  test('should delete chore', async ({ page }) => {
     const apiUrl = page.url().split('/chores')[0];
 
-    const createResponse = await request.post(`${apiUrl}/api/chores`, {
+    const createResponse = await page.request.post(`${apiUrl}/api/chores`, {
       data: {
         title: `Delete Test ${Date.now()}`,
         progress: 0,
@@ -106,7 +106,7 @@ test.describe('Chores CRUD Operations', () => {
     await page.goto('/chores');
     await expect(page.locator(`text=Delete Test`)).toBeVisible();
 
-    const deleteResponse = await request.delete(`${apiUrl}/api/chores/${choreId}`);
+    const deleteResponse = await page.request.delete(`${apiUrl}/api/chores/${choreId}`);
 
     expect(deleteResponse.ok()).toBeTruthy();
 

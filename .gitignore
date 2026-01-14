@@ -38,3 +38,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 worktrees/
+
+# Secrets & PII
+docs/pelicano family credentials.md
+docs/PII.md
+src/lib/db/seed-pelicano-family.ts
+src/lib/db/update-pelicano-passwords.ts
+e2e/pelicano-family.spec.ts

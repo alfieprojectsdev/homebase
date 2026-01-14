@@ -5,7 +5,9 @@ import { verifyToken } from './src/lib/auth/jwt';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/bills') || pathname.startsWith('/api/bills') || pathname.startsWith('/api/auth/me')) {
+  console.log(`Middleware: Processing ${pathname}`);
+
+  if (pathname.startsWith('/bills') || pathname.startsWith('/api/bills') || pathname.startsWith('/chores') || pathname.startsWith('/api/chores') || pathname.startsWith('/api/auth/me')) {
     const token = request.cookies.get('token')?.value;
 
     if (!token) {
@@ -45,5 +47,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/bills/:path*', '/api/bills/:path*', '/api/auth/me', '/login', '/signup'],
+  matcher: ['/bills/:path*', '/api/bills/:path*', '/chores/:path*', '/api/chores/:path*', '/api/auth/me', '/login', '/signup'],
 };

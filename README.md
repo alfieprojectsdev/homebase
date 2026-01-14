@@ -45,10 +45,11 @@ Homebase prioritizes **reliability over features**. A simple bill tracker that w
 - ✅ Duplicate prevention for recurring bills
 - ✅ PelicanoFamily alpha testing accounts (5 users)
 - ✅ Production E2E test suite (32 tests, 100% passing)
+- ✅ **Heuristics System**: Pattern recognition, anomaly detection, and smart suggestions for bills
+- ✅ **Chores Management**: Integrated chores tracking with multi-residence support and visual progress bars
 
-### 🚧 Pending Review / Worktree Features
-- 🏗️ **Heuristics System**: Pattern recognition, anomaly detection, and smart suggestions for bills
-- 🏗️ **Chores Management**: Integrated chores tracking with multi-residence support and visual progress bars
+### 🚧 Pending / In Progress
+- 🏗️ **Mission-critical Notifications**: SMS fallback integration (Phase 2)
 
 ### Phase 2-4 (Next)
 - 📋 Mission-critical push notifications with SMS fallback
@@ -514,4 +515,4 @@ Always seek professional help for critical matters.
 
 ---
 
-*Last updated: January 12, 2026*
+*Last updated: January 14, 2026*
