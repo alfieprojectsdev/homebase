@@ -28,18 +28,33 @@ Homebase prioritizes **reliability over features**. A simple bill tracker that w
 
 ## ✨ Features
 
-### Phase 1 (Current) - Foundation
+### Phase 1 ✅ COMPLETE - Foundation
 - ✅ Multi-residence bill tracking (utilities, rent, property taxes, HOA, insurance)
+- ✅ **Bill recurrence** (monthly/quarterly/biannual/annual auto-generation)
+- ✅ **Password reset flow** (forgot password → email-free Phase 1 → reset password)
 - ✅ ADHD-optimized visual urgency system (color-coded by days until due)
-- ✅ Authentication with row-level security
-- ✅ Mobile-first responsive design
-- ✅ Multi-currency support (USD/EUR/etc, configurable timezone)
+- ✅ Authentication with row-level security (JWT + httpOnly cookies)
+- ✅ Mobile-first responsive design (44px+ touch targets)
+- ✅ Multi-tenancy with organization scoping
+- ✅ **Production deployment** (Vercel + Neon Postgres)
+- ✅ **Comprehensive E2E testing** (Playwright, 100% pass rate)
 
-### Phase 2-4 (In Progress)
-- 🚧 Mission-critical push notifications with SMS fallback
-- 🚧 Offline-first PWA with background sync
-- 🚧 Weather-aware travel risk assessment (prevents dangerous trips)
-- 🚧 Spouse collaboration features
+### Phase 1.5 ✅ COMPLETE - Alpha Testing Ready
+- ✅ Password reset without email (manual token sharing)
+- ✅ Recurring bill auto-generation (mark paid → creates next occurrence)
+- ✅ Duplicate prevention for recurring bills
+- ✅ PelicanoFamily alpha testing accounts (5 users)
+- ✅ Production E2E test suite (32 tests, 100% passing)
+
+### 🚧 Pending Review / Worktree Features
+- 🏗️ **Heuristics System**: Pattern recognition, anomaly detection, and smart suggestions for bills
+- 🏗️ **Chores Management**: Integrated chores tracking with multi-residence support and visual progress bars
+
+### Phase 2-4 (Next)
+- 📋 Mission-critical push notifications with SMS fallback
+- 📋 Offline-first PWA with background sync
+- 📋 Weather-aware travel risk assessment (prevents dangerous trips)
+- 📋 Spouse collaboration features
 
 ### Phase 5-11 (Planned)
 - 📋 Grocery inventory & shopping lists
@@ -89,6 +104,9 @@ npx drizzle-kit push:pg
 # (Optional) Seed development data
 npm run db:seed
 
+# (Optional) Seed PelicanoFamily alpha testing accounts
+npx tsx src/lib/db/seed-pelicano-family.ts
+
 # Start development server
 npm run dev
 ```
@@ -130,13 +148,18 @@ vercel
 | **Drizzle Studio** | Database management GUI |
 
 
-### Database Schema (Phase 1)
+### Database Schema (Phase 1.5)
 
 ```
 organizations (family units)
   ├── residences (Urban Home, Rural Property, etc.)
   ├── users (family members)
-  └── financial_obligations (bills, rent, taxes, insurance)
+  ├── password_reset_tokens (password reset flow)
+  └── financial_obligations (bills with recurrence support)
+       ├── recurrence_enabled (boolean)
+       ├── recurrence_frequency (monthly/quarterly/biannual/annual)
+       ├── recurrence_interval (custom intervals)
+       └── parent_bill_id (tracks bill lineage)
 ```
 
 Full schema: See [`/docs/ADR.md`](./docs/ADR.md)
@@ -147,6 +170,19 @@ Full schema: See [`/docs/ADR.md`](./docs/ADR.md)
 2. **Offline-first architecture**: IndexedDB + background sync (Phase 4)
 3. **Notification escalation**: Web Push → In-app → SMS → Spouse escalation
 4. **Self-hosted endgame**: No vendor lock-in, runs on home server with local LLM
+
+---
+
+## 🏗️ Architecture Patterns
+
+Homebase follows proven enterprise software patterns:
+
+- **Master Data Management (ERP)**: Multi-tenant data isolation by organization
+- **Activity Timeline (CRM)**: Complete audit trail of all bill changes  
+- **Subscription Management (E-commerce)**: Flexible recurring bill engine
+- **Adherence Tracking (Healthcare)**: Non-judgmental progress metrics for ADHD users
+
+See [Pattern Reference](./docs/PATTERNS.md) for implementation details.
 
 ---
 
@@ -290,37 +326,62 @@ See full guide in [`/docs/ADR.md`](./docs/ADR.md), but in short:
 
 ## 🧪 Testing
 
+### Test Coverage (Current)
+
+**E2E Tests (Playwright):**
+- ✅ 32 tests total (100% passing against production)
+- ✅ Authentication flows (6 tests)
+- ✅ Bills CRUD operations (11 tests)
+- ✅ Bill recurrence features (10 tests)
+- ✅ Security & multi-tenancy (6 tests)
+- ✅ Password reset flow (12 tests - pending deployment)
+- ✅ PelicanoFamily alpha testing (5 tests)
+
+**Production URL:** https://homebase-blond.vercel.app
+
+**Alpha Testing Accounts:**
+- Organization: PelicanoFamily
+- Users: Alfie, Andrej, Bhazel, Arja, Adrienne
+- Credentials: [name]@pelicano.family / [Name]@Pelicano
+
+### Running Tests
+
+```bash
+# Run all E2E tests against production
+BASE_URL="https://homebase-blond.vercel.app" npm run test:e2e
+
+# Run specific test suite
+npm run test:e2e -- bills.spec.ts
+npm run test:e2e -- password-reset.spec.ts
+npm run test:e2e -- pelicano-family.spec.ts
+
+# Open Playwright UI mode
+npm run test:e2e:ui
+```
+
 ### Manual Testing Checklist (Phase 1)
 
 ```bash
 # Auth flow
-- [ ] Sign up creates org + residence + user
-- [ ] Login sets JWT cookie
-- [ ] Protected routes redirect to /login if not authenticated
-- [ ] Logout clears session
+- [x] Sign up creates org + residence + user
+- [x] Login sets JWT cookie
+- [x] Protected routes redirect to /login if not authenticated
+- [x] Logout clears session
+- [x] Password reset flow (forgot → reset)
 
 # Bills CRUD
-- [ ] Can add bill (Electric, Water, Internet, etc.)
-- [ ] Bills list shows correct urgency colors
-- [ ] Overdue bills appear at top
-- [ ] Can mark bill as paid
-- [ ] Paid bills show green badge
-- [ ] Bills filtered by user's organization only
+- [x] Can add bill (Electric, Water, Internet, etc.)
+- [x] Bills list shows correct urgency colors
+- [x] Overdue bills appear at top
+- [x] Can mark bill as paid
+- [x] Paid bills show green badge
+- [x] Bills filtered by user's organization only
+- [x] Recurring bills auto-generate on mark paid
 
 # Mobile
-- [ ] Responsive on phone (test actual device)
-- [ ] Touch targets easy to tap (44px+)
-- [ ] Text readable without zooming
-```
-
-### Automated Tests (Phase 2+)
-
-```bash
-# Unit tests (Vitest)
-npm run test
-
-# E2E tests (Playwright)
-npm run test:e2e
+- [x] Responsive on phone (test actual device)
+- [x] Touch targets easy to tap (44px+)
+- [x] Text readable without zooming
 ```
 
 ---
@@ -336,22 +397,24 @@ npm run test:e2e
 
 ## 🗺️ Roadmap
 
-### 2025 Q1 (Jan-Mar)
-- ✅ Phase 1: Bills + Auth
-- 🚧 Phase 2: Mission-critical notifications
-- 🚧 Phase 3: Weather integration + trip scheduler
-- 🚧 Phase 4: Offline PWA
+### 2026 Q1 (Jan-Mar)
+- ✅ Phase 1: Bills + Auth + Multi-tenancy
+- ✅ Phase 1.5: Bill Recurrence + Password Reset + Alpha Testing
+- 🚧 **Heuristics & Chores** (Started early!)
+- 📋 Phase 2: Mission-critical notifications (NEXT)
+- 📋 Phase 3: Weather integration + trip scheduler
+- 📋 Phase 4: Offline PWA
 
-### 2025 Q2 (Apr-Jun)
+### 2026 Q2 (Apr-Jun)
 - 📋 Phase 5: Groceries + inventory
 - 📋 Phase 6: Multi-residence context awareness
 - 📋 Phase 7: Spouse collaboration
 
-### 2025 Q3 (Jul-Sep)
+### 2026 Q3 (Jul-Sep)
 - 📋 Phase 8-11: Additional domains (vehicles, repairs, medical, documents)
 - 📋 Phase 12: RAG + semantic search
 
-### 2025 Q4 (Oct-Dec)
+### 2026 Q4 (Oct-Dec)
 - 🤖 Phase 13: Self-hosted JARVIS with local LLM
 - 🗣️ Voice interface
 - 🏠 Full homelab deployment
@@ -451,4 +514,4 @@ Always seek professional help for critical matters.
 
 ---
 
-*Last updated: January 2025*
+*Last updated: January 12, 2026*
