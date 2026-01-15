@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -101,138 +101,146 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8">
-        {/* Loading state */}
-        {loading && (
-          <div className="text-center">
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Validating Reset Link
-            </h2>
-            <p className="mt-4 text-lg text-gray-600">Please wait...</p>
-          </div>
-        )}
+    <div className="max-w-md w-full space-y-8">
+      {/* Loading state */}
+      {loading && (
+        <div className="text-center">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Validating Reset Link
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">Please wait...</p>
+        </div>
+      )}
 
-        {/* Invalid token state */}
-        {!loading && !validToken && (
-          <div className="space-y-6">
+      {/* Invalid token state */}
+      {!loading && !validToken && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Invalid Reset Link
+            </h2>
+          </div>
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+            <p className="font-bold text-lg mb-2">Reset link is invalid or expired</p>
+            <p className="text-base">{error}</p>
+          </div>
+          <div className="text-center">
+            <Link
+              href="/forgot-password"
+              className="inline-flex justify-center items-center py-4 px-6 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              style={{ minHeight: '48px' }}
+            >
+              Request New Reset Link
+            </Link>
+          </div>
+          <div className="text-center">
+            <Link
+              href="/login"
+              className="font-medium text-indigo-600 hover:text-indigo-500 text-lg"
+            >
+              Back to Sign in
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Valid token - show reset form */}
+      {!loading && validToken && !success && (
+        <div>
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Reset Password
+            </h2>
+            <p className="mt-2 text-center text-lg text-gray-600">
+              Enter new password for: <span className="font-semibold">{email}</span>
+            </p>
+          </div>
+
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg"
+                  placeholder="New Password (minimum 8 characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ minHeight: '44px' }}
+                />
+              </div>
+              <div>
+                <input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={{ minHeight: '44px' }}
+                />
+              </div>
+            </div>
+
             <div>
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Invalid Reset Link
-              </h2>
-            </div>
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-              <p className="font-bold text-lg mb-2">Reset link is invalid or expired</p>
-              <p className="text-base">{error}</p>
-            </div>
-            <div className="text-center">
-              <Link
-                href="/forgot-password"
-                className="inline-flex justify-center items-center py-4 px-6 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              <button
+                type="submit"
+                disabled={submitting}
+                className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ minHeight: '48px' }}
               >
-                Request New Reset Link
-              </Link>
+                {submitting ? 'Resetting Password...' : 'Reset Password'}
+              </button>
             </div>
-            <div className="text-center">
-              <Link
-                href="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500 text-lg"
-              >
-                Back to Sign in
-              </Link>
-            </div>
-          </div>
-        )}
+          </form>
 
-        {/* Valid token - show reset form */}
-        {!loading && validToken && !success && (
+          <div className="text-center mt-4">
+            <Link
+              href="/login"
+              className="font-medium text-indigo-600 hover:text-indigo-500 text-lg"
+            >
+              Back to Sign in
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Success state */}
+      {success && (
+        <div className="space-y-6">
           <div>
-            <div>
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Reset Password
-              </h2>
-              <p className="mt-2 text-center text-lg text-gray-600">
-                Enter new password for: <span className="font-semibold">{email}</span>
-              </p>
-            </div>
-
-            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg"
-                    placeholder="New Password (minimum 8 characters)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{ minHeight: '44px' }}
-                  />
-                </div>
-                <div>
-                  <input
-                    id="confirm-password"
-                    name="confirm-password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    style={{ minHeight: '44px' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ minHeight: '48px' }}
-                >
-                  {submitting ? 'Resetting Password...' : 'Reset Password'}
-                </button>
-              </div>
-            </form>
-
-            <div className="text-center mt-4">
-              <Link
-                href="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500 text-lg"
-              >
-                Back to Sign in
-              </Link>
-            </div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Password Reset Complete
+            </h2>
           </div>
-        )}
-
-        {/* Success state */}
-        {success && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Password Reset Complete
-              </h2>
-            </div>
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-              <p className="font-bold text-lg mb-2">✅ Password updated successfully!</p>
-              <p className="text-base">Redirecting to login page...</p>
-            </div>
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            <p className="font-bold text-lg mb-2">✅ Password updated successfully!</p>
+            <p className="text-base">Redirecting to login page...</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <Suspense fallback={<div>Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
     </div>
   );
 }
