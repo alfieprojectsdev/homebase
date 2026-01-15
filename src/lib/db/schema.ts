@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, decimal, integer, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, decimal, integer, boolean, pgEnum, jsonb } from 'drizzle-orm/pg-core';
 
 export const organizations = pgTable('organizations', {
   id: serial('id').primaryKey(),
@@ -25,6 +25,8 @@ export const users = pgTable('users', {
   lastAppOpen: timestamp('last_app_open'),
   primaryResidence: text('primary_residence'),
   overallForgetRate: decimal('overall_forget_rate', { precision: 5, scale: 2 }).default('0'),
+  phoneNumber: varchar('phone_number', { length: 20 }).unique(),
+  phoneNumberVerified: boolean('phone_number_verified').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -75,6 +77,13 @@ export const financialObligations = pgTable('financial_obligations', {
   lastUrgencyCalculation: timestamp('last_urgency_calculation'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+
+  // Phase 2: Hard Deadline Support
+  remotePaymentDeadline: timestamp('remote_payment_deadline'),
+  remotePaymentMethod: text('remote_payment_method'),
+  fallbackPaymentMethod: text('fallback_payment_method'),
+  hardDeadline: boolean('hard_deadline').default(false).notNull(),
+  deadlineConsequence: text('deadline_consequence'),
 });
 
 export type BillStatus = 'pending' | 'paid' | 'overdue';
@@ -150,3 +159,29 @@ export const choreStreaks = pgTable('chore_streaks', {
   lastCompletedAt: timestamp('last_completed_at'),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+// ... existing imports
+export const notificationLogs = pgTable('notification_logs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: varchar('type', { length: 50 }).notNull(), // 'web-push', 'sms', 'email'
+  channel: varchar('channel', { length: 50 }).notNull(), // 'urgent', 'marketing', etc.
+  status: varchar('status', { length: 50 }).notNull(), // 'sent', 'failed', 'queued'
+  title: text('title'),
+  body: text('body'),
+  metadata: text('metadata'), // JSON string
+  sentAt: timestamp('sent_at').defaultNow(),
+  error: text('error'),
+  relatedBillId: integer('related_bill_id'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Phase 2: Web Push Subscriptions
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  endpoint: text('endpoint').notNull().unique(),
+  keys: jsonb('keys').notNull(), // { p256dh: string, auth: string }
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+

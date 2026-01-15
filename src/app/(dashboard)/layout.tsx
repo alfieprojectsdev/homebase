@@ -67,6 +67,12 @@ export default function DashboardLayout({
               <div className="flex items-center gap-4">
                 <span className="text-gray-700">{user.name}</span>
                 <button
+                  onClick={() => router.push('/settings')}
+                  className="text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  Settings
+                </button>
+                <button
                   onClick={handleLogout}
                   className="text-gray-600 hover:text-gray-900 font-medium"
                   style={{ minHeight: '44px', padding: '0.5rem 1rem' }}

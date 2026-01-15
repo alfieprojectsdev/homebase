@@ -45,6 +45,7 @@ worktrees/
 # Secrets & PII
 docs/pelicano family credentials.md
 docs/PII.md
+docs/twilio_2FA_recovery_code.txt
 src/lib/db/seed-pelicano-family.ts
 src/lib/db/update-pelicano-passwords.ts
 e2e/pelicano-family.spec.ts
