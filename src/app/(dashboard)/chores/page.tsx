@@ -62,7 +62,7 @@ export default function ChoresPage() {
                                 </span>
                             </div>
                             <div className="mt-2">
-                                <ProgressBar progress={chore.progress} />
+                                <ProgressBar progress={chore.progress} choreTitle={chore.title} />
                             </div>
                         </div>
                     ))}
