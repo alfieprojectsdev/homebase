@@ -7,6 +7,8 @@ import { eq } from 'drizzle-orm';
  * Mask email for privacy
  * Example: "user@example.com" -> "us**@ex*****.com"
  */
+export const dynamic = 'force-dynamic';
+
 function maskEmail(email: string): string {
   const [local, domain] = email.split('@');
   const maskedLocal = local.length > 2
