@@ -91,10 +91,10 @@ export default function ChoreCard({ chore, onProgressUpdate, previousProgress }:
             +25%
           </button>
           <button
-            onClick={() => handleIncrement(25)}
+            onClick={() => handleIncrement(50)}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 text-sm font-medium min-h-[44px]"
           >
-            +25%
+            +50%
           </button>
           <button
             onClick={handleMarkDone}

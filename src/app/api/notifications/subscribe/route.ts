@@ -10,7 +10,7 @@ function getUserId() {
     // For now, assuming first user or extracting from header if passed.
     // In real app, verify JWT from cookie.
     const cookieStore = cookies();
-    const token = cookieStore.get('auth_token')?.value;
+    const token = cookieStore.get('token')?.value;
     if (!token) return null;
 
     try {

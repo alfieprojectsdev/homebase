@@ -39,7 +39,16 @@ export class EscalationLogic {
     /**
      * Log a sent notification
      */
-    static async logNotification(userId: number, billId: number, urgency: UrgencyLevel, type: string, status: string, error?: string) {
+    static async logNotification(
+        userId: number,
+        billId: number,
+        urgency: UrgencyLevel,
+        type: string,
+        status: string,
+        title: string = 'Bill Reminder',
+        body: string = `Urgency: ${urgency}`,
+        error?: string
+    ) {
         await db.insert(notificationLogs).values({
             userId,
             relatedBillId: billId,
@@ -47,8 +56,8 @@ export class EscalationLogic {
             type,
             status,
             error: error || null,
-            title: 'Bill Reminder', // Simplified
-            body: `Urgency: ${urgency}`, // Simplified
+            title,
+            body,
         });
     }
 }

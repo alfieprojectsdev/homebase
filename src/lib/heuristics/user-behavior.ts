@@ -24,7 +24,11 @@ export async function calculateUserBehavior(
   }
 
   const paidBills = await db
-    .select({ paidAt: financialObligations.paidAt, dueDate: financialObligations.dueDate })
+    .select({
+      paidAt: financialObligations.paidAt,
+      dueDate: financialObligations.dueDate,
+      category: financialObligations.category
+    })
     .from(financialObligations)
     .where(
       and(
@@ -44,7 +48,7 @@ export async function calculateUserBehavior(
       (bill.paidAt.getTime() - bill.dueDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    const category = bill.paidAt.toDateString();
+    const category = bill.category || 'uncategorized';
 
     if (!typeCounts[category]) {
       typeCounts[category] = { total: 0, late: 0 };

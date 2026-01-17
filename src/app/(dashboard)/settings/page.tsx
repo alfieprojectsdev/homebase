@@ -1,23 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 
 export default function SettingsPage() {
-    const [phone, setPhone] = useState('');
-    const [saving, setSaving] = useState(false);
-
-    // Mock save for now
-    const handleSavePhone = async () => {
-        setSaving(true);
-        // TODO: Connect to API
-        setTimeout(() => {
-            setSaving(false);
-            alert('Phone number saved (mock)');
-        }, 1000);
-    };
-
     return (
         <div className="max-w-4xl mx-auto p-6">
             <h1 className="text-3xl font-bold mb-8">Settings</h1>
@@ -30,24 +16,19 @@ export default function SettingsPage() {
 
             <div className="bg-white p-6 rounded-lg shadow">
                 <h2 className="text-xl font-semibold mb-4">Contact Info (SMS Fallback)</h2>
-                <div className="flex gap-4">
+                <div className="flex gap-4 items-center">
                     <input
                         type="tel"
-                        className="border p-2 rounded flex-1"
+                        className="border p-2 rounded flex-1 bg-gray-100 cursor-not-allowed"
                         placeholder="+1234567890"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        disabled
                     />
-                    <button
-                        onClick={handleSavePhone}
-                        disabled={saving}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                        {saving ? 'Saving...' : 'Save'}
-                    </button>
+                    <span className="bg-yellow-100 text-yellow-800 px-3 py-2 rounded text-sm font-medium">
+                        Coming Soon
+                    </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
-                    Used for emergency alerts only (e.g., hard deadlines with remote payment lockouts).
+                    SMS notifications for emergency alerts will be available in a future update.
                 </p>
             </div>
         </div>
