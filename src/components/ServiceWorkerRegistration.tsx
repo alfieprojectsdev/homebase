@@ -27,7 +27,7 @@ export default function ServiceWorkerRegistration() {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && (window as any).workbox !== undefined) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Logic handled by next-pwa usually, but we need custom registration for Push
       // For now, let's just check if we can register ours or attach to existing
       // Actually, standard SW registration:
