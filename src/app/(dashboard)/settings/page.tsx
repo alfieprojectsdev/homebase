@@ -19,7 +19,7 @@ export default function SettingsPage() {
                 <div className="flex gap-4 items-center">
                     <input
                         type="tel"
-                        className="border p-2 rounded flex-1 bg-gray-100 cursor-not-allowed"
+                        className="border p-3 rounded flex-1 bg-gray-100 cursor-not-allowed placeholder:text-gray-600 min-h-[44px]"
                         placeholder="+1234567890"
                         disabled
                     />
