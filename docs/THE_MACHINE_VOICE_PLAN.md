@@ -78,6 +78,28 @@ services:
 *   ** cochlear implant mode**: If using mobile PWA, allow background audio playback for "always on" guidance.
 *   **Urgency Interrupts**: Allow the system to push audio notifications ("Can you hear me? We have a problem.") for critical alerts.
 
+### Alternative: The "Patchwork" Voice (Pre-S5E5)
+*Objective: Simulate the original "cut-and-paste" voice of The Machine, stitched together from thousands of surveillance clips.*
+
+This approach is legally safer (if using public domain audio) and aesthetically distinct, though more technically complex to make intelligible.
+
+**Technical Approach: Modern Concatenative Synthesis**
+
+1.  **Phoneme/Word Bank Generation**:
+    *   Instead of training a single coherent model, create a database of ~100 distinct voices reading common words and phonemes.
+    *   *Data Source:* Use datasets like `LibriSpeech` or `Common Voice` to get thousands of different speakers.
+    *   *Processing:* Force-align transcripts to audio to slice perfectly at word/phoneme boundaries.
+2.  **Selection Algorithm**:
+    *   When synthesizing a sentence (e.g., "Admin access required"), the engine selects each word from a *different* speaker in the database.
+    *   *Heuristic:* Prioritize rapid shifts in pitch, gender, and background noise to maximize the "surveillance collage" effect.
+3.  **DSP "Glitch" Chain**:
+    *   Apply micro-fades (10ms) between clips to avoid clicking, but *do not* smooth the transition. The harsh cut is the desired aesthetic.
+    *   Add mild background static or tape hiss that persists across the cuts to glue them together.
+
+**Implementation Tools**:
+*   **MFA (Montreal Forced Aligner)**: To slice audio clips precisely by word.
+*   **Python (Pydub/Librosa)**: To stitch the selected clips together dynamically.
+
 ---
 
 ## ⚖️ Ethical & Legal Considerations
