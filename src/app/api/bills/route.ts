@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { financialObligations } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { getAuthUser } from '@/lib/auth/server';
+import { BillRepository } from '@/infrastructure/adapters/neon/BillRepository';
+import { Bill } from '@/core/domain/finance/models/Bill';
+import { RecurrenceEngine } from '@/core/domain/finance/services/RecurrenceEngine';
 
 export const runtime = 'nodejs';
+
+// Infrastructure Injection (in a real app, this would be a DI container)
+const billRepo = new BillRepository();
 
 export async function GET(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -14,12 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const bills = await db
-      .select()
-      .from(financialObligations)
-      .where(eq(financialObligations.orgId, authUser.orgId))
-      .orderBy(financialObligations.dueDate);
-
+    const bills = await billRepo.findAll({ orgId: authUser.orgId });
     return NextResponse.json({ bills });
   } catch (error) {
     console.error('Get bills error:', error);
@@ -40,69 +38,46 @@ export async function POST(request: NextRequest) {
       name,
       amount,
       dueDate,
-      residenceId,
       recurrenceEnabled,
       recurrenceFrequency,
       recurrenceInterval,
       recurrenceDayOfMonth
     } = body;
 
+    // 1. Basic Validation (Controller Layer)
     if (!name || !amount || !dueDate) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate amount is positive number
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum <= 0 || amountNum > 999999999) {
-      return NextResponse.json({ error: 'Amount must be a positive number less than 1 billion' }, { status: 400 });
-    }
+    // 2. Construct Core Entity
+    const newBill = new Bill(
+      'temp-new', // ID assigned by repo
+      name,
+      parseFloat(amount),
+      new Date(dueDate),
+      authUser.orgId,
+      'pending'
+    );
 
-    // Validate dueDate is valid date
-    const dueDateObj = new Date(dueDate);
-    if (isNaN(dueDateObj.getTime())) {
-      return NextResponse.json({ error: 'Invalid due date' }, { status: 400 });
-    }
-
-    // Validate recurrence settings if enabled
-    let validatedInterval = 1;
-    if (recurrenceEnabled) {
-      const validFrequencies = ['monthly', 'quarterly', 'biannual', 'annual'];
-      if (recurrenceFrequency && !validFrequencies.includes(recurrenceFrequency)) {
-        return NextResponse.json({ error: 'Invalid recurrence frequency' }, { status: 400 });
-      }
-
-      // Validate interval (1-12 reasonable range)
-      const interval = recurrenceInterval || 1;
-      if (interval < 1 || interval > 12) {
-        return NextResponse.json({ error: 'Recurrence interval must be between 1 and 12' }, { status: 400 });
-      }
-      validatedInterval = interval;
-
-      // Validate day of month (1-31)
-      if (recurrenceDayOfMonth && (recurrenceDayOfMonth < 1 || recurrenceDayOfMonth > 31)) {
-        return NextResponse.json({ error: 'Day of month must be between 1 and 31' }, { status: 400 });
+    // 3. Apply Domain Logic (Recurrence)
+    if (recurrenceEnabled && recurrenceFrequency) {
+      newBill.recurrence = {
+        frequency: recurrenceFrequency,
+        interval: recurrenceInterval || 1,
+        dayOfMonth: recurrenceDayOfMonth
+      };
+      // Optional: Verify next date logic works (not strictly saving it here, but validating it)
+      try {
+        RecurrenceEngine.calculateNextDate(newBill.dueDate, newBill.recurrence);
+      } catch (e) {
+        return NextResponse.json({ error: 'Invalid recurrence configuration' }, { status: 400 });
       }
     }
 
-    const [bill] = await db
-      .insert(financialObligations)
-      .values({
-        orgId: authUser.orgId,
-        residenceId: residenceId ? parseInt(residenceId) : null,
-        name,
-        amount: amount.toString(),
-        dueDate: new Date(dueDate),
-        status: 'pending',
+    // 4. Persistence
+    const savedBill = await billRepo.save(newBill);
 
-        // Recurrence fields (Phase 1.5B)
-        recurrenceEnabled: recurrenceEnabled || false,
-        recurrenceFrequency: recurrenceEnabled ? recurrenceFrequency : null,
-        recurrenceInterval: recurrenceEnabled ? validatedInterval : null,
-        recurrenceDayOfMonth: recurrenceEnabled ? recurrenceDayOfMonth : null,
-      })
-      .returning();
-
-    return NextResponse.json({ bill });
+    return NextResponse.json({ bill: savedBill });
   } catch (error) {
     console.error('Create bill error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

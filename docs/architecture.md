@@ -129,12 +129,65 @@ Ah, this changes the architecture significantly—and makes it **much** more int
 
 Let me redesign the approach with your actual requirements:
 
-## Revised Architecture
+## Homebase Architecture: Distributed Household ERP
 
-### Core Principles
-1. **Self-hosted hub** (Raspberry Pi) as source of truth
-2. **Offline-first mobile clients** that sync when on local network
-3. **Context detection** (which residence, who's present)
+Homebase is designed as a **Distributed Hexagonal Architecture (Ports & Adapters)** system. It separates the "Household Brain" (Core) from the infrastructure (Server, Sensors, Databases), allowing it to run across a mesh of devices (Cloud, Raspberry Pis, Mobile).
+
+## 1. Top-Level Structure
+
+```
+src/
+├── core/                  # 🧠 THE BRAIN (Pure Typescript, Zero Framework Dependencies)
+│   ├── domain/            # Business Logic & Entities
+│   │   ├── finance/       # Money, Bills, Loans
+│   │   ├── operations/    # Chores, Maintenance
+│   │   ├── inventory/     # Groceries, Assets
+│   │   └── identity/      # Nodes, Users, Auth
+│   └── ports/             # 🔌 Interfaces for the outside world
+│       ├── IPersistence   # Abstract storage (Offline-synced)
+│       ├── IContextSensor # GPS, Weather, Battery
+│       └── INotifier      # Push, SMS, Speakers
+│
+├── infrastructure/        # 🏗️ THE BODY (Adapters)
+│   ├── adapters/          # Concrete implementations of Ports
+│   │   ├── neon/          # Postgres/Drizzle Adapter (Server)
+│   │   ├── pouchdb/       # (Planned) Offline-first Adapter
+│   │   └── mock-sensor/   # Simulation Sensors
+│   └── db/                # Drizzle Schema & Migrations
+│
+├── app/                   # 🌐 THE FACE (Next.js)
+│   ├── api/               # Controllers (REST/RPC)
+│   └── (dashboard)/       # UI Components
+```
+
+## 2. Core Concepts
+
+### Node Awareness (`identity/NodeProfile`)
+Each instance of Homebase knows "Where am I?".
+- **Mothership**: The central cloud server (Vercel). Source of Truth.
+- **Satellite**: A Raspberry Pi in the car or kitchen.
+- **Client**: A mobile phone PWA.
+
+### Offline-First Persistence
+The core depends on `IPersistence<T>`, not Drizzle. This allows us to swap mechanisms:
+- **Online**: Direct connection to Neon Postgres.
+- **Offline**: Local PouchDB/SQLite, syncing when `IContextSensor` detects `isOnline: true`.
+
+## 3. Domain Logic Example: Finance
+The **Finance Domain** manages bills and recurrence.
+- **Entity**: `Bill` (Pure class with methods like `isOverdue()`).
+- **Service**: `RecurrenceEngine` (Pure math for "Next Due Date").
+- **Flow**:
+    1. `API Route` receives POST request.
+    2. Instantiates `Bill` entity.
+    3. Uses `RecurrenceEngine` to calculate schedule.
+    4. Saves via `BillRepository` (Adapter).
+
+## 4. Technology Map
+- **Core**: TypeScript (Strict)
+- **Web/API**: Next.js 14 (App Router)
+- **Database**: Neon (Serverless Postgres) + Drizzle ORM
+- **Deployment**: Vercel (Mothership)
 4. **Voice → RAG → proactive notifications**
 
 ### Tech Stack (Revised)
