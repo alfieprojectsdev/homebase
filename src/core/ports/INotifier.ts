@@ -1,17 +1,14 @@
-export type NotificationChannel = 'urgent' | 'info' | 'marketing';
+import { User } from '../domain/identity/models/User';
 
-export interface NotificationMessage {
-    title: string;
-    body: string;
-    metadata?: Record<string, any>;
-    channels?: NotificationChannel[];
-}
+export type AlertUrgency = 'low' | 'critical';
 
-/**
- * Unified interface for alerting the household.
- * Implementations could be: Web Push, SMS (Twilio), MQTT (Home Assistant), or Local Speaker.
- */
 export interface INotifier {
-    notify(userId: string | number, message: NotificationMessage): Promise<boolean>;
-    broadcast(message: NotificationMessage): Promise<boolean>;
+    /**
+     * Sends an alert to a specific user.
+     * @param user The user entity (containing phone/email/push tokens)
+     * @param message Text content of the alert
+     * @param urgency used to decide channel (critical -> sms/push, low -> log/email)
+     */
+    sendAlert(user: User, message: string, urgency: AlertUrgency): Promise<boolean>;
 }
+

@@ -48,8 +48,11 @@ Homebase prioritizes **reliability over features**. A simple bill tracker that w
 - ✅ **Heuristics System**: Pattern recognition, anomaly detection, and smart suggestions for bills
 - ✅ **Chores Management**: Integrated chores tracking with multi-residence support and visual progress bars
 
-### 🚧 Pending / In Progress
-- 🏗️ **Mission-critical Notifications**: SMS fallback integration (Phase 2)
+### Phase 2 ✅ COMPLETE - Core & Notifications
+- ✅ **Distributed Hexagonal Architecture**: Refactored core logic for portability (Node/Pi/Mobile).
+- ✅ **Notification Loop**: Daily system-wide checks via Vercel Cron (09:00 UTC).
+- ✅ **Infrastructure Adapters**: Decoupled database and notification logic.
+- 🏗️ **SMS Fallback**: Pending Twilio integration.
 
 ### Phase 2-4 (Next)
 - 📋 Mission-critical push notifications with SMS fallback
