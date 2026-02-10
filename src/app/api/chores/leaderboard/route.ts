@@ -25,16 +25,17 @@ export async function GET(request: NextRequest) {
       .where(eq(choreStreaks.orgId, authUser.orgId))
       .orderBy(desc(choreStreaks.currentStreak));
 
-    const aggregated = leaderboardData.reduce((acc: any[], entry) => {
-      const existing = acc.find((e: any) => e.userId === entry.userId);
+    const aggregatedMap = new Map<any, any>();
+    for (const entry of leaderboardData) {
+      const existing = aggregatedMap.get(entry.userId);
       if (existing) {
-        existing.totalStreaks += entry.totalStreaks;
+        existing.totalStreaks = (existing.totalStreaks || 0) + (entry.totalStreaks || 0);
         existing.longestStreak = Math.max(existing.longestStreak || 0, entry.longestStreak || 0);
       } else {
-        acc.push({ ...entry });
+        aggregatedMap.set(entry.userId, { ...entry });
       }
-      return acc;
-    }, []);
+    }
+    const aggregated = Array.from(aggregatedMap.values());
 
     return NextResponse.json({ leaderboard: aggregated });
   } catch (error) {
