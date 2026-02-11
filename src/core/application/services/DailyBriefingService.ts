@@ -15,16 +15,27 @@ export class DailyBriefingService {
         const users = await this.userRepo.findAll();
         console.log(`[DailyBriefing] Checking for ${users.length} users...`);
 
+        // Optimization: Fetch all bills once to avoid N+1 queries
+        const allBills = await this.billRepo.findAll();
+
+        // Group bills by orgId for O(1) access
+        const billsByOrg = new Map<number, Bill[]>();
+        for (const bill of allBills) {
+            const orgBills = billsByOrg.get(bill.orgId) || [];
+            orgBills.push(bill);
+            billsByOrg.set(bill.orgId, orgBills);
+        }
+
         for (const user of users) {
-            await this.checkBillsForUser(user);
+            const userBills = billsByOrg.get(user.orgId) || [];
+            await this.checkBillsForUser(user, userBills);
         }
     }
 
-    private async checkBillsForUser(user: User): Promise<void> {
-        const allBills = await this.billRepo.findAll({ orgId: user.orgId });
+    private async checkBillsForUser(user: User, bills: Bill[]): Promise<void> {
         const now = new Date();
 
-        for (const bill of allBills) {
+        for (const bill of bills) {
             if (bill.status === 'paid') continue;
 
             const daysUntilDue = Math.ceil((bill.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
