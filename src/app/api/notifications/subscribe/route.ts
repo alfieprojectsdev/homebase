@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { pushSubscriptions, users } from '@/lib/db/schema';
+import { pushSubscriptions } from '@/lib/db/schema';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 
