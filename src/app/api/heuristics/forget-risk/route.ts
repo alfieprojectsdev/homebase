@@ -4,7 +4,7 @@ import { financialObligations } from '@/lib/db/schema';
 import { getAuthUser } from '@/lib/auth/server';
 import { predictForgetRisk } from '@/lib/heuristics/forget-risk-prediction';
 import { calculateUserBehavior } from '@/lib/heuristics/user-behavior';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -24,7 +24,12 @@ export async function POST(request: NextRequest) {
     const [bill] = await db
       .select()
       .from(financialObligations)
-      .where(eq(financialObligations.id, parseInt(billId)))
+      .where(
+        and(
+          eq(financialObligations.id, parseInt(billId)),
+          eq(financialObligations.orgId, authUser.orgId)
+        )
+      )
       .limit(1);
 
     if (!bill) {
