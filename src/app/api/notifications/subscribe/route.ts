@@ -1,34 +1,19 @@
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { pushSubscriptions, users } from '@/lib/db/schema';
-import { cookies } from 'next/headers';
-import { verify } from 'jsonwebtoken';
+import { pushSubscriptions } from '@/lib/db/schema';
+import { getServerSession } from '@/lib/auth/server';
 
-// Hacky auth retrieval for MVP (ideally usage middleware or session helper)
-function getUserId() {
-    // For now, assuming first user or extracting from header if passed.
-    // In real app, verify JWT from cookie.
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
-    if (!token) return null;
-
-    try {
-        const decoded: any = verify(token, process.env.JWT_SECRET!);
-        return decoded.userId;
-    } catch {
-        return null;
-    }
-}
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         const subscription = await req.json();
-        const userId = getUserId();
+        const authUser = await getServerSession();
 
-        if (!userId) {
+        if (!authUser) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const userId = authUser.userId;
 
         await db.insert(pushSubscriptions).values({
             userId,
