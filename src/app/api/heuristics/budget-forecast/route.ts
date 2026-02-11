@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { financialObligations } from '@/lib/db/schema';
 import { getAuthUser } from '@/lib/auth/server';
 import { forecastMonthlyBills } from '@/lib/heuristics/budget-forecasting';
-import { eq } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -16,10 +16,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const months = parseInt(searchParams.get('months') || '3', 10);
 
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+
     const history = await db
       .select()
       .from(financialObligations)
-      .where(eq(financialObligations.orgId, authUser.orgId))
+      .where(
+        and(
+          eq(financialObligations.orgId, authUser.orgId),
+          gte(financialObligations.dueDate, cutoffDate)
+        )
+      )
       .orderBy(financialObligations.dueDate);
 
     const forecast = forecastMonthlyBills(
