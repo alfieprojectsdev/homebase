@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { DailyBriefingService } from '@/core/application/services/DailyBriefingService';
 import { BillRepository } from '@/infrastructure/adapters/neon/BillRepository';
 import { UserRepository } from '@/infrastructure/adapters/neon/UserRepository';
@@ -7,7 +7,12 @@ import { ConsoleNotifier } from '@/infrastructure/adapters/notifications/Console
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic'; // Ensure cron always runs fresh
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         // Composition Root (Wiring up the Hexagon)
         const billRepo = new BillRepository();
