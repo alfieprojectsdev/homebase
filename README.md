@@ -70,10 +70,10 @@ Homebase prioritizes **reliability over features**. A simple bill tracker that w
 - 🔧 Appliance warranties & repairs
 
 ### Phase 12-13 (Future)
-- 🤖 **JARVIS**: Self-hosted conversational AI assistant
-- 🗣️ Voice interface with wake word
-- 🧠 Proactive suggestions based on patterns
-- 🏠 Fully local LLM (no cloud dependencies)
+- 👁️ **The Machine**: Self-hosted predictive AI engine
+- 📊 "Relevant" vs "Irrelevant" sorting (Critical vs Routine)
+- 🧠 Threat analysis based on patterns (Predicting failures before they happen)
+- 🏠 Fully local processing (The Machine does not share data)
 
 ---
 
@@ -312,7 +312,7 @@ TWILIO_PHONE_NUMBER=""
 # Phase 3+ (weather integration)
 OPENWEATHER_API_KEY=""
 
-# Phase 12+ (self-hosted JARVIS)
+# Phase 12+ (self-hosted The Machine)
 OLLAMA_URL="http://localhost:11434"
 ```
 
@@ -419,7 +419,7 @@ npm run test:e2e:ui
 - 📋 Phase 12: RAG + semantic search
 
 ### 2026 Q4 (Oct-Dec)
-- 🤖 Phase 13: Self-hosted JARVIS with local LLM
+- 👁️ Phase 13: Self-hosted The Machine with local LLM
 - 🗣️ Voice interface
 - 🏠 Full homelab deployment
 
@@ -445,7 +445,7 @@ Homebase is built on different assumptions:
 
 ### Design Inspiration
 
-- **JARVIS (Iron Man)**: Proactive, context-aware, conversational assistant
+- **The Machine (Person of Interest)**: Predictive analytics, "irrelevant" vs "relevant" sorting, always watching to prevent bad things from happening
 - **ADHD medication**: Doesn't fix the brain, provides external structure
 - **Mission-critical systems**: Redundancy, escalation, fail-safes
 - **Home automation**: Ambient intelligence, anticipates needs
