@@ -4,7 +4,7 @@
  */
 export interface IPersistence<T> {
     findById(id: string | number): Promise<T | null>;
-    findAll(filter?: Partial<T>): Promise<T[]>;
+    findAll(filter?: Partial<T>, options?: { limit?: number; offset?: number }): Promise<T[]>;
     save(entity: T): Promise<T>;
     delete(id: string | number): Promise<boolean>;
 

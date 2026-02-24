@@ -19,10 +19,18 @@ export class UserRepository implements IPersistence<User> {
         return this.mapToDomain(result[0]);
     }
 
-    async findAll(filter?: Partial<User>): Promise<User[]> {
-        // Basic implementation: fetch all users
-        // In a real app, we might filter by 'active' status or similar
-        const result = await db.select().from(users);
+    async findAll(filter?: Partial<User>, options?: { limit?: number; offset?: number }): Promise<User[]> {
+        let query = db.select().from(users).$dynamic();
+
+        if (options?.limit !== undefined) {
+            query = query.limit(options.limit);
+        }
+
+        if (options?.offset !== undefined) {
+            query = query.offset(options.offset);
+        }
+
+        const result = await query;
         return result.map(this.mapToDomain);
     }
 
