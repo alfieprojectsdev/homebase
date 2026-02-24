@@ -12,21 +12,35 @@ export class DailyBriefingService {
     ) { }
 
     async runSystemCheck(): Promise<void> {
-        const users = await this.userRepo.findAll();
+        // Optimization: Fetch all data in parallel to avoid N+1 queries
+        const [users, allBills] = await Promise.all([
+            this.userRepo.findAll(),
+            this.billRepo.findAll()
+        ]);
+
         console.log(`[DailyBriefing] Checking for ${users.length} users...`);
 
+        // Group bills by orgId for O(1) lookup
+        const billsByOrg = new Map<number, Bill[]>();
+        for (const bill of allBills) {
+            // Optimization: Skip paid bills early
+            if (bill.status === 'paid') continue;
+
+            const orgBills = billsByOrg.get(bill.orgId) || [];
+            orgBills.push(bill);
+            billsByOrg.set(bill.orgId, orgBills);
+        }
+
         for (const user of users) {
-            await this.checkBillsForUser(user);
+            const userBills = billsByOrg.get(user.orgId) || [];
+            await this.checkBillsForUser(user, userBills);
         }
     }
 
-    private async checkBillsForUser(user: User): Promise<void> {
-        const allBills = await this.billRepo.findAll({ orgId: user.orgId });
+    private async checkBillsForUser(user: User, bills: Bill[]): Promise<void> {
         const now = new Date();
 
-        for (const bill of allBills) {
-            if (bill.status === 'paid') continue;
-
+        for (const bill of bills) {
             const daysUntilDue = Math.ceil((bill.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
             // Urgency Logic
