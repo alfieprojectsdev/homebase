@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import { db } from './index';
 import { organizations, residences, users, financialObligations } from './schema';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 async function seed() {
   console.log('🌱 Seeding database...');
@@ -32,14 +34,25 @@ async function seed() {
 
   console.log(`✅ Created 2 residences: ${primaryResidence.name}, ${secondaryResidence.name}`);
 
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  // Use environment variables for sensitive data
+  const email = process.env.SEED_EMAIL || 'demo@example.com';
+  let password = process.env.SEED_PASSWORD;
+  let isGeneratedPassword = false;
+
+  if (!password) {
+    // Generate a secure random password if not provided
+    password = crypto.randomBytes(12).toString('hex');
+    isGeneratedPassword = true;
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   const [user] = await db
     .insert(users)
     .values({
       orgId: org.id,
       residenceId: primaryResidence.id,
-      email: 'demo@example.com',
+      email: email,
       password: hashedPassword,
       name: 'Test User',
       role: 'admin',
@@ -89,8 +102,14 @@ async function seed() {
 
   console.log('\n🎉 Database seeded successfully!');
   console.log('\n📝 Test credentials:');
-  console.log('   Email: demo@example.com');
-  console.log('   Password: password123');
+  console.log(`   Email: ${email}`);
+
+  if (isGeneratedPassword) {
+    console.log(`   Password: ${password} (Generated)`);
+    console.log('   ⚠️  Please save this password as it will not be shown again.');
+  } else {
+    console.log('   Password: [HIDDEN] (Provided via SEED_PASSWORD)');
+  }
   process.exit(0);
 }
 
