@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { chores, choreHistory } from '@/lib/db/schema';
+import { chores, choreHistory, type Chore } from '@/lib/db/schema';
 import { eq, and, lt, or, isNull } from 'drizzle-orm';
 
 interface ChoreNotificationContext {
@@ -53,7 +53,7 @@ export async function sendChoreReminders(context: ChoreNotificationContext) {
   }
 }
 
-async function shouldSendReminder(chore: any, now: Date): Promise<boolean> {
+export async function shouldSendReminder(chore: Chore, now: Date): Promise<boolean> {
   const lastReminder = chore.lastReminderSentAt ? new Date(chore.lastReminderSentAt) : null;
 
   if (!lastReminder) {
@@ -97,7 +97,7 @@ async function shouldSendReminder(chore: any, now: Date): Promise<boolean> {
   }
 }
 
-export function getChoreNotificationPayload(chore: any) {
+export function getChoreNotificationPayload(chore: Chore) {
   return {
     title: chore.title,
     body: `${chore.progress}% complete - Don't forget to finish!`,
