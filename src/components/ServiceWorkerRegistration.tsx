@@ -33,7 +33,6 @@ export default function ServiceWorkerRegistration() {
       // Actually, standard SW registration:
       navigator.serviceWorker.register('/sw.js')
         .then(reg => {
-          console.log('SW registered', reg);
           setRegistration(reg);
           reg.pushManager.getSubscription().then(sub => {
             if (sub) {
@@ -60,7 +59,6 @@ export default function ServiceWorkerRegistration() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
-      console.log('Web Push Subscribed:', sub);
       setIsSubscribed(true);
       setSubscription(sub);
 
