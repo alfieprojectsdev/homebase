@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { financialObligations } from '@/lib/db/schema';
 import { getAuthUser } from '@/lib/auth/server';
 import { detectAnomalies } from '@/lib/heuristics/anomaly-detection';
-import { eq, and, desc } from 'drizzle-orm';
-
-interface BillForAnalysis {
-  id: number;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  createdAt: Date;
-}
+import { fetchBillHistory } from '@/lib/heuristics/utils';
+import { HeuristicBill } from '@/lib/heuristics/types';
 
 export async function POST(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -28,50 +19,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'amount required' }, { status: 400 });
     }
 
-    let history: BillForAnalysis[] = [];
+    let history: HeuristicBill[] = [];
 
     if (billId) {
-      const [bill] = await db
-        .select()
-        .from(financialObligations)
-        .where(
-          and(
-            eq(financialObligations.id, parseInt(billId)),
-            eq(financialObligations.orgId, authUser.orgId)
-          )
-        )
-        .limit(1);
+      const { bill, history: fetchedHistory } = await fetchBillHistory(
+        authUser.orgId,
+        {
+          billId: parseInt(billId),
+        }
+      );
 
       if (!bill) {
         return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
       }
 
-      const billHistory = await db
-        .select()
-        .from(financialObligations)
-        .where(
-          and(
-            eq(financialObligations.orgId, authUser.orgId),
-            eq(financialObligations.name, bill.name)
-          )
-        )
-        .orderBy(desc(financialObligations.dueDate))
-        .limit(12);
-
-      history = billHistory.map((b): BillForAnalysis => ({
-        id: b.id,
-        name: b.name,
-        amount: parseFloat(b.amount),
-        dueDate: b.dueDate,
-        createdAt: b.createdAt,
-      }));
+      history = fetchedHistory;
     }
 
-    const currentBill: BillForAnalysis = {
+    const currentBill: HeuristicBill = {
       id: billId ? parseInt(billId) : 0,
       name: 'Current Bill',
       amount: parseFloat(amount),
       dueDate: new Date(),
+      status: 'pending',
       createdAt: new Date(),
     };
 

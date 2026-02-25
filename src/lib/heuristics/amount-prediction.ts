@@ -1,4 +1,5 @@
 import { mean, standardDeviation, linearRegression } from 'simple-statistics';
+import { HeuristicBill } from './types';
 
 interface BillAmountPrediction {
   suggested: number;
@@ -7,15 +8,7 @@ interface BillAmountPrediction {
   range?: [number, number];
 }
 
-interface Bill {
-  id: number;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  createdAt: Date;
-}
-
-export function suggestBillAmount(billHistory: Bill[]): BillAmountPrediction {
+export function suggestBillAmount(billHistory: HeuristicBill[]): BillAmountPrediction {
   if (billHistory.length === 0) {
     return {
       suggested: 0,

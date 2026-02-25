@@ -1,3 +1,5 @@
+import { HeuristicBill } from './types';
+
 interface UrgencyContext {
   currentResidence: string;
   userLatenessRate: number;
@@ -10,17 +12,7 @@ interface UrgencyScore {
   reasons: string[];
 }
 
-interface Bill {
-  id: number;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  status: string;
-  category?: string;
-  residenceId?: number;
-}
-
-export function calculateUrgencyScore(bill: Bill, context: UrgencyContext): UrgencyScore {
+export function calculateUrgencyScore(bill: HeuristicBill, context: UrgencyContext): UrgencyScore {
   let score = 0;
   const reasons: string[] = [];
 
