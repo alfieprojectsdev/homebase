@@ -12,19 +12,36 @@ export class DailyBriefingService {
     ) { }
 
     async runSystemCheck(): Promise<void> {
-        const users = await this.userRepo.findAll();
-        console.log(`[DailyBriefing] Checking for ${users.length} users...`);
+        const [users, allBills] = await Promise.all([
+            this.userRepo.findAll(),
+            this.billRepo.findAll()
+        ]);
+
+        console.log(`[DailyBriefing] Checking for ${users.length} users and ${allBills.length} bills...`);
+
+        // Group bills by orgId for efficient lookup
+        const billsByOrg = new Map<number, Bill[]>();
+        for (const bill of allBills) {
+            const list = billsByOrg.get(bill.orgId) || [];
+            list.push(bill);
+            billsByOrg.set(bill.orgId, list);
+        }
+
+        const alertPromises: Promise<boolean>[] = [];
 
         for (const user of users) {
-            await this.checkBillsForUser(user);
+            const userBills = billsByOrg.get(user.orgId as number) || [];
+            alertPromises.push(...this.checkBillsForUser(user, userBills));
         }
+
+        await Promise.all(alertPromises);
     }
 
-    private async checkBillsForUser(user: User): Promise<void> {
-        const allBills = await this.billRepo.findAll({ orgId: user.orgId });
+    private checkBillsForUser(user: User, bills: Bill[]): Promise<boolean>[] {
         const now = new Date();
+        const alertPromises: Promise<boolean>[] = [];
 
-        for (const bill of allBills) {
+        for (const bill of bills) {
             if (bill.status === 'paid') continue;
 
             const daysUntilDue = Math.ceil((bill.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -35,12 +52,14 @@ export class DailyBriefingService {
             else if (daysUntilDue <= 3) urgencyScore = 70;
 
             if (urgencyScore > 80) {
-                await this.notifier.sendAlert(
+                alertPromises.push(this.notifier.sendAlert(
                     user,
                     `URGENT: ${bill.name} is due ${daysUntilDue <= 0 ? 'today' : 'tomorrow'} (${bill.amount} PHP)`,
                     'critical'
-                );
+                ));
             }
         }
+
+        return alertPromises;
     }
 }
