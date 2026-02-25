@@ -10,11 +10,6 @@ test.describe('Notification Engine (Production)', () => {
         permissions: ['notifications'], // Grant notification permissions automatically
     });
 
-    test.beforeEach(async ({ page }) => {
-        page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
-        page.on('pageerror', err => console.log(`BROWSER ERROR: ${err.message}`));
-    });
-
     test('should subscribe to web push notifications successfully', async ({ page }) => {
         // 1. Login
         await page.goto('/login');
@@ -29,14 +24,6 @@ test.describe('Notification Engine (Production)', () => {
         await page.goto('/settings');
         // Use a more specific locator for the page title vs app title
         await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
-
-        // Debug: Check SW Registration (Now safe to check)
-        const swRegistrations = await page.evaluate(async () => {
-            if (!('serviceWorker' in navigator)) return 'Not Supported';
-            const regs = await navigator.serviceWorker.getRegistrations();
-            return regs.length;
-        });
-        console.log(`DEBUG: SW Registrations count: ${swRegistrations}`);
 
         // 3. Setup Request Interception for Subscription API
         const subscribeRequestPromise = page.waitForRequest(request =>
@@ -62,7 +49,6 @@ test.describe('Notification Engine (Production)', () => {
         } else {
             // If already active, verify the status
             await expect(page.locator('text=✅ Active')).toBeVisible();
-            console.log('Push notifications already enabled for this user.');
         }
     });
 
