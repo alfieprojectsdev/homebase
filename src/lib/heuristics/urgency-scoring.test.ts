@@ -1,5 +1,6 @@
 import { describe, expect, test, setSystemTime, beforeEach, afterEach } from "bun:test";
-import { calculateUrgencyScore, type Bill, type UrgencyContext } from "./urgency-scoring";
+import { calculateUrgencyScore, type UrgencyContext } from "./urgency-scoring";
+import type { HeuristicBill as Bill } from "./types";
 
 describe("calculateUrgencyScore", () => {
   const mockNow = new Date("2023-01-01T00:00:00.000Z");

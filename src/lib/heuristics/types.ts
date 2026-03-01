@@ -3,8 +3,8 @@ export interface HeuristicBill {
   name: string;
   amount: number;
   dueDate: Date;
-  status: string;
+  status?: string;
   category?: string;
   residenceId?: number | null;
-  createdAt: Date;
+  createdAt?: Date;
 }
