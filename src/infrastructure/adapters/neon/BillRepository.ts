@@ -30,7 +30,6 @@ export class BillRepository implements IPersistence<Bill> {
         }
 
         const result = await query.orderBy(desc(financialObligations.dueDate));
-
         return result.map(this.mapToDomain);
     }
 

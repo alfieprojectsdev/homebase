@@ -18,7 +18,7 @@ export class DailyBriefingService {
             this.billRepo.findAll()
         ]);
 
-        console.log(`[DailyBriefing] Checking for ${users.length} users...`);
+        console.log(`[DailyBriefing] Checking for ${users.length} users and ${allBills.length} bills...`);
 
         // Group bills by orgId for O(1) lookup
         const billsByOrg = new Map<number, Bill[]>();
@@ -31,14 +31,19 @@ export class DailyBriefingService {
             billsByOrg.set(bill.orgId, orgBills);
         }
 
+        const alertPromises: Promise<boolean>[] = [];
+
         for (const user of users) {
-            const userBills = billsByOrg.get(user.orgId) || [];
-            await this.checkBillsForUser(user, userBills);
+            const userBills = billsByOrg.get(user.orgId as number) || [];
+            alertPromises.push(...this.checkBillsForUser(user, userBills));
         }
+
+        await Promise.all(alertPromises);
     }
 
-    private async checkBillsForUser(user: User, bills: Bill[]): Promise<void> {
+    private checkBillsForUser(user: User, bills: Bill[]): Promise<boolean>[] {
         const now = new Date();
+        const alertPromises: Promise<boolean>[] = [];
 
         for (const bill of bills) {
             if (bill.status === 'paid') continue;
@@ -51,12 +56,14 @@ export class DailyBriefingService {
             else if (daysUntilDue <= 3) urgencyScore = 70;
 
             if (urgencyScore > 80) {
-                await this.notifier.sendAlert(
+                alertPromises.push(this.notifier.sendAlert(
                     user,
                     `URGENT: ${bill.name} is due ${daysUntilDue <= 0 ? 'today' : 'tomorrow'} (${bill.amount} PHP)`,
                     'critical'
-                );
+                ));
             }
         }
+
+        return alertPromises;
     }
 }
