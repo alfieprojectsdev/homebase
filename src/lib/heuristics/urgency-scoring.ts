@@ -1,16 +1,16 @@
-interface UrgencyContext {
+export interface UrgencyContext {
   currentResidence: string;
   userLatenessRate: number;
   severeWeatherForecast: boolean;
 }
 
-interface UrgencyScore {
+export interface UrgencyScore {
   score: number;
   level: 'critical' | 'high' | 'normal';
   reasons: string[];
 }
 
-interface Bill {
+export interface Bill {
   id: number;
   name: string;
   amount: number;
