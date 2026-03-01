@@ -19,7 +19,7 @@ export class BillRepository implements IPersistence<Bill> {
         return this.mapToDomain(result[0]);
     }
 
-    async findAll(filter?: Partial<Bill>): Promise<Bill[]> {
+    async findAll(filter?: Partial<Bill>, options?: { limit?: number; offset?: number }): Promise<Bill[]> {
         let query = db
             .select()
             .from(financialObligations)
@@ -29,7 +29,17 @@ export class BillRepository implements IPersistence<Bill> {
             query = query.where(eq(financialObligations.orgId, filter.orgId));
         }
 
-        const result = await query.orderBy(desc(financialObligations.dueDate));
+        query = query.orderBy(desc(financialObligations.dueDate));
+
+        if (options?.limit !== undefined) {
+            query = query.limit(options.limit);
+        }
+
+        if (options?.offset !== undefined) {
+            query = query.offset(options.offset);
+        }
+
+        const result = await query;
         return result.map(this.mapToDomain);
     }
 
