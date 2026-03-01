@@ -20,16 +20,16 @@ export class BillRepository implements IPersistence<Bill> {
     }
 
     async findAll(filter?: Partial<Bill>): Promise<Bill[]> {
-        // Only supporting basic filtering by orgId for now as per current use case
-        if (!filter?.orgId) {
-            throw new Error('OrgId is required for findAll bills');
-        }
-
-        const result = await db
+        let query = db
             .select()
             .from(financialObligations)
-            .where(eq(financialObligations.orgId, filter.orgId))
-            .orderBy(desc(financialObligations.dueDate));
+            .$dynamic();
+
+        if (filter?.orgId) {
+            query = query.where(eq(financialObligations.orgId, filter.orgId));
+        }
+
+        const result = await query.orderBy(desc(financialObligations.dueDate));
 
         return result.map(this.mapToDomain);
     }
