@@ -1,4 +1,5 @@
 import { mean, standardDeviation } from 'simple-statistics';
+import { HeuristicBill } from './types';
 
 interface AnomalyDetection {
   isAnomaly: boolean;
@@ -6,15 +7,7 @@ interface AnomalyDetection {
   severity?: 'high' | 'medium' | 'low';
 }
 
-interface Bill {
-  id: number;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  createdAt: Date;
-}
-
-export function detectAnomalies(currentBill: Bill, history: Bill[]): AnomalyDetection {
+export function detectAnomalies(currentBill: HeuristicBill, history: HeuristicBill[]): AnomalyDetection {
   if (history.length < 2) {
     return { isAnomaly: false };
   }

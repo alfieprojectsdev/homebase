@@ -1,4 +1,5 @@
 import { differenceInDays, addDays } from 'date-fns';
+import { HeuristicBill } from './types';
 
 interface BillingCycleAnalysis {
   cycle: number;
@@ -7,15 +8,7 @@ interface BillingCycleAnalysis {
   confidence: 'high' | 'low';
 }
 
-interface Bill {
-  id: number;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  createdAt: Date;
-}
-
-export function analyzeBillingCycle(bills: Bill[]): BillingCycleAnalysis {
+export function analyzeBillingCycle(bills: HeuristicBill[]): BillingCycleAnalysis {
   if (bills.length < 2) {
     return {
       cycle: 30,
