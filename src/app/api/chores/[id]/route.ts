@@ -130,7 +130,10 @@ async function updateStreak(choreId: number, userId: number, orgId: number) {
     .select()
     .from(choreStreaks)
     .where(
-      eq(choreStreaks.userId, userId)
+      and(
+        eq(choreStreaks.userId, userId),
+        eq(choreStreaks.choreId, choreId)
+      )
     )
     .limit(1);
 
