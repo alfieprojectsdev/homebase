@@ -1,7 +1,7 @@
 // @ts-ignore
 import { describe, expect, test, mock } from 'bun:test';
 
-const sendNotificationMock = mock(() => Promise.resolve());
+const sendNotificationMock = mock((_sub: unknown, _payload: string) => Promise.resolve());
 const setVapidDetailsMock = mock(() => {});
 
 mock.module('web-push', () => {

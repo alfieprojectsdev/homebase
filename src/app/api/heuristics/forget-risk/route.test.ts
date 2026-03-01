@@ -3,8 +3,8 @@ import { expect, test, describe, mock } from "bun:test";
 
 // Mock drizzle-orm before any other imports
 mock.module("drizzle-orm", () => ({
-  eq: mock((col, val) => ({ type: 'eq', col, val })),
-  and: mock((...args) => ({ type: 'and', args })),
+  eq: mock((col: unknown, val: unknown) => ({ type: 'eq', col, val })),
+  and: mock((...args: unknown[]) => ({ type: 'and', args })),
 }));
 
 // Mock the database schema
@@ -85,7 +85,7 @@ describe("Forget Risk Route Security", () => {
     let capturedWhere: any;
     (db.select as any).mockReturnValue({
       from: mock(() => ({
-        where: mock((clause) => {
+        where: mock((clause: unknown) => {
           capturedWhere = clause;
           return {
             limit: mock(() => []) // Return empty to simulate "not found" (due to orgId check)
