@@ -15,7 +15,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/notifications') ||
     pathname.startsWith('/api/auth/me')
   ) {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('token')?.value
+      ?? request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
 
     if (!token) {
       if (pathname.startsWith('/api')) {
@@ -37,7 +38,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname === '/login' || pathname === '/signup') {
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get('token')?.value
+      ?? request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
 
     if (token) {
       const payload = await verifyToken(token);

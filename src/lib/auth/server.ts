@@ -3,13 +3,20 @@ import { cookies } from 'next/headers';
 import { verifyToken } from './jwt';
 
 export async function getAuthUser(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
-
-  if (!token) {
-    return null;
+  // Try cookie first (web clients)
+  const cookieToken = request.cookies.get('token')?.value;
+  if (cookieToken) {
+    return verifyToken(cookieToken);
   }
 
-  return verifyToken(token);
+  // Fallback: Bearer token header (mobile clients)
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const bearerToken = authHeader.slice(7);
+    return verifyToken(bearerToken);
+  }
+
+  return null;
 }
 
 /**

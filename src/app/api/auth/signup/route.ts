@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         role: user.role,
         orgId: org.id,
       },
+      token, // For mobile clients (web clients ignore this, use cookie)
     });
 
     response.cookies.set('token', token, {
