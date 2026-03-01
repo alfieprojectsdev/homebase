@@ -27,6 +27,7 @@ export const users = pgTable('users', {
   overallForgetRate: decimal('overall_forget_rate', { precision: 5, scale: 2 }).default('0'),
   phoneNumber: varchar('phone_number', { length: 20 }).unique(),
   phoneNumberVerified: boolean('phone_number_verified').default(false).notNull(),
+  expoPushToken: varchar('expo_push_token', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

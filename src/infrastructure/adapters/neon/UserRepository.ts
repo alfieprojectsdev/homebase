@@ -20,9 +20,14 @@ export class UserRepository implements IPersistence<User> {
     }
 
     async findAll(filter?: Partial<User>): Promise<User[]> {
-        // Basic implementation: fetch all users
-        // In a real app, we might filter by 'active' status or similar
-        const result = await db.select().from(users);
+        const query = db.select().from(users);
+
+        if (filter?.orgId !== undefined) {
+            const result = await query.where(eq(users.orgId, filter.orgId));
+            return result.map(this.mapToDomain);
+        }
+
+        const result = await query;
         return result.map(this.mapToDomain);
     }
 
@@ -41,7 +46,8 @@ export class UserRepository implements IPersistence<User> {
             row.email,
             row.orgId,
             row.role as UserRole,
-            row.phoneNumber || undefined
+            row.phoneNumber || undefined,
+            row.expoPushToken || undefined
         );
     }
 }

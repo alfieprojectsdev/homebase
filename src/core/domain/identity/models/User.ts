@@ -7,6 +7,7 @@ export class User {
         public email: string,
         public orgId: number,
         public role: UserRole,
-        public phoneNumber?: string
+        public phoneNumber?: string,
+        public expoPushToken?: string
     ) { }
 }
