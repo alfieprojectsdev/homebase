@@ -25,6 +25,8 @@ export async function sendChoreReminders(context: ChoreNotificationContext) {
       )
     );
 
+  const updatePromises: Promise<any>[] = [];
+
   for (const chore of choresNeedingReminder) {
     if (!chore.activeStartHour || !chore.activeEndHour) continue;
 
@@ -32,28 +34,34 @@ export async function sendChoreReminders(context: ChoreNotificationContext) {
       continue;
     }
 
-    const shouldSend = await shouldSendReminder(chore, now);
+    const shouldSend = shouldSendReminder(chore, now);
 
     if (shouldSend) {
       console.log(`[Chore Notification] Reminder for chore "${chore.title}" (ID: ${chore.id})`);
 
-      await db
-        .update(chores)
-        .set({ lastReminderSentAt: now })
-        .where(eq(chores.id, chore.id));
+      updatePromises.push(
+        db
+          .update(chores)
+          .set({ lastReminderSentAt: now })
+          .where(eq(chores.id, chore.id))
+      );
 
-      await db.insert(choreHistory).values({
-        choreId: chore.id,
-        userId: context.userId,
-        orgId: context.orgId,
-        action: 'progress_updated',
-        newProgress: chore.progress,
-      });
+      updatePromises.push(
+        db.insert(choreHistory).values({
+          choreId: chore.id,
+          userId: context.userId,
+          orgId: context.orgId,
+          action: 'progress_updated',
+          newProgress: chore.progress,
+        })
+      );
     }
   }
+
+  await Promise.all(updatePromises);
 }
 
-export async function shouldSendReminder(chore: Chore, now: Date): Promise<boolean> {
+export function shouldSendReminder(chore: Chore, now: Date): boolean {
   const lastReminder = chore.lastReminderSentAt ? new Date(chore.lastReminderSentAt) : null;
 
   if (!lastReminder) {
