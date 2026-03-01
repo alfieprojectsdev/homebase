@@ -1,3 +1,4 @@
+import { type InferSelectModel } from 'drizzle-orm';
 import { pgTable, serial, text, timestamp, varchar, decimal, integer, boolean, pgEnum, jsonb } from 'drizzle-orm/pg-core';
 
 export const organizations = pgTable('organizations', {
@@ -126,6 +127,8 @@ export const chores = pgTable('chores', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export type Chore = InferSelectModel<typeof chores>;
 
 export const choreHistory = pgTable('chore_history', {
   id: serial('id').primaryKey(),
