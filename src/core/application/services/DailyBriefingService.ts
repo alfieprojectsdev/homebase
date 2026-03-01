@@ -12,15 +12,20 @@ export class DailyBriefingService {
     ) { }
 
     async runSystemCheck(): Promise<void> {
-        const users = await this.userRepo.findAll();
+        // Optimization: Fetch all data in parallel to avoid N+1 queries
+        const [users, allBills] = await Promise.all([
+            this.userRepo.findAll(),
+            this.billRepo.findAll()
+        ]);
+
         console.log(`[DailyBriefing] Checking for ${users.length} users...`);
 
-        // Optimization: Fetch all bills once to avoid N+1 queries
-        const allBills = await this.billRepo.findAll();
-
-        // Group bills by orgId for O(1) access
+        // Group bills by orgId for O(1) lookup
         const billsByOrg = new Map<number, Bill[]>();
         for (const bill of allBills) {
+            // Optimization: Skip paid bills early
+            if (bill.status === 'paid') continue;
+
             const orgBills = billsByOrg.get(bill.orgId) || [];
             orgBills.push(bill);
             billsByOrg.set(bill.orgId, orgBills);
