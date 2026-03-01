@@ -24,7 +24,7 @@ export class NotificationService {
     /**
      * Send a Web Push notification
      */
-    static async sendWebPush(subscription: PushSubscription, title: string, body: string, data?: any) {
+    static async sendWebPush(subscription: PushSubscription, title: string, body: string, data?: Record<string, unknown>) {
         if (!vapidPublicKey || !vapidPrivateKey) {
             console.warn('VAPID keys not configured. Skipping Web Push.');
             return false;
