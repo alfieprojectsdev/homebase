@@ -2,28 +2,40 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **⚠ ACTIVE RESTART (2026-07-16): read `docs/HANDOVER-chores-restart-2026-07-16.md` before planning any work.** Chores tracking is being rebuilt for native Kotlin Android (NOT the Expo app in `apps/mobile` — owner rejected it) + PWA for the kids' iOS devices. That handover carries the settled decisions, device constraints, toolchain state, and priority order from the scoping session.
+
 ## Project Overview
 
 Homebase is a multi-residence household management system designed for ADHD executive function support. It provides aggressive, context-aware reminders to prevent catastrophic failures like forgotten bills and missed maintenance deadlines.
 
 **Core Philosophy:** "The system catches it, so your brain doesn't have to."
 
-**Current Phase:** Phase 2 — Bills + Chores + Notifications + Heuristics (self-hosted JARVIS planned for Phases 12-13).
+**Current Phase:** Phase M1 (mobile) + Phase 3 planning. Phases 1–2 and Chores (Phase 7) are shipped. Self-hosted JARVIS planned for Phases 12-13.
+
+**Monorepo layout:** Next.js web app lives at the repo root; Expo mobile app lives at `apps/mobile/`. They share the same API backend — the web app uses httpOnly cookie auth while the mobile app uses `Authorization: Bearer <jwt>` headers.
 
 ## Tech Stack
 
+**Web (root):**
 - **Framework:** Next.js 14 (App Router, TypeScript)
 - **Database:** Neon Postgres (production) + SQLite/better-sqlite3 (E2E testing) with Drizzle ORM
-- **Auth:** Custom JWT with httpOnly cookies (no external auth providers)
+- **Auth:** Custom JWT — httpOnly cookies (web) / Bearer token (mobile)
 - **Styling:** Tailwind CSS (ADHD-optimized: high contrast, large touch targets)
 - **Notifications:** Web Push via VAPID (`web-push` library), SMS deferred
 - **Heuristics:** `simple-statistics` + custom algorithms (no external ML)
 - **Deployment:** Vercel with daily cron job at 9 AM
 
+**Mobile (`apps/mobile/`):**
+- **Framework:** Expo SDK 52 (managed workflow) + Expo Router 4 (file-based navigation)
+- **Styling:** NativeWind v4 (Tailwind-like for React Native)
+- **State:** React Query v5 (server state + offline cache)
+- **Storage:** `expo-secure-store` (encrypted JWT), `expo-notifications` (push)
+- **Distribution:** EAS Build → TestFlight (iOS) / APK sideload (Android)
+
 ## Development Commands
 
 ```bash
-# Development
+# Web — run from repo root
 npm run dev              # Start dev server on http://localhost:3000
 npm run build            # Production build
 npm run lint             # Run ESLint
@@ -34,20 +46,26 @@ npm run test:e2e         # Run all Playwright tests (headless)
 npm run test:e2e:ui      # Open Playwright UI
 npm run test:e2e:headed  # Run tests in headed mode
 npm run test:e2e:report  # Show HTML test report
-# Run a single spec:
-npx playwright test e2e/bills.spec.ts
+npx playwright test e2e/bills.spec.ts  # Run a single spec
 
-# Database Operations
+# Database
 npx drizzle-kit generate:pg    # Generate migration from schema changes
 npx drizzle-kit push:pg        # Push schema to Neon (requires DATABASE_URL)
 npx tsx src/lib/db/seed.ts     # Seed dev data (test@devfamily.com / password123)
 npx tsx src/lib/db/seed-pelicano-family.ts  # Seed Pelicano family dataset
 npx drizzle-kit studio         # Open Drizzle Studio GUI
+
+# Mobile — run from apps/mobile/
+cd apps/mobile
+npx expo start           # Start Expo dev server (scan QR or press i/a)
+npx expo start --ios     # iOS simulator
+npx expo start --android # Android emulator
 ```
 
 ## Project Structure
 
 ```
+# Web (root)
 src/
 ├── app/
 │   ├── (auth)/              # Login, signup, forgot-password, reset-password
@@ -84,6 +102,16 @@ src/
 middleware.ts                # Route protection (bills, chores, auth/me)
 drizzle.config.ts            # Drizzle config — requires DATABASE_URL env var
 vercel.json                  # Cron schedule: /api/cron/daily at 0 9 * * *
+
+# Mobile (apps/mobile/)
+apps/mobile/
+├── app/
+│   ├── (auth)/              # Login screen
+│   ├── (tabs)/              # Tab navigator: bills/, chores/, settings/
+│   ├── _layout.tsx          # Root layout (auth gate + React Query provider)
+│   └── index.tsx            # Redirect to tabs or login
+├── lib/                     # API clients, auth helpers, query hooks
+└── app.json                 # Expo config (SDK 52, bundleId: com.homebase.mobile)
 ```
 
 ## Database Schema
@@ -131,6 +159,7 @@ When modifying schema:
 - Signup creates org → residence → user in a transaction, returns JWT
 - Token expiry: 7 days max (see `src/lib/auth/jwt.ts`)
 - Password hashing: bcrypt 10 rounds (`src/lib/auth/password.ts`)
+- **Dual auth transport:** Web uses httpOnly cookie; mobile sends `Authorization: Bearer <jwt>`. All API routes must handle both (see `src/lib/auth/headers.ts`).
 
 ## Heuristics System
 
