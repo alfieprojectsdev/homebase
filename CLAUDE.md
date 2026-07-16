@@ -10,7 +10,7 @@ Homebase is a multi-residence household management system designed for ADHD exec
 
 **Core Philosophy:** "The system catches it, so your brain doesn't have to."
 
-**Current Phase:** Phase M1 (mobile) + Phase 3 planning. Phases 1–2 and Chores (Phase 7) are shipped. Self-hosted JARVIS planned for Phases 12-13.
+**Current Phase:** Phase M1 (mobile) + Phase 3 planning. Phases 1–2 shipped. Chores (Phase 7) is 🚧: CRUD, feedback, history, streaks, and leaderboard work end-to-end, but reminder notifications are not wired — `sendChoreReminders()` in `src/lib/notifications/chores.ts` is dead code (no cron/route calls it) and only `console.log`s rather than pushing via `WebPushNotifier`/`ExpoPushNotifier`. Self-hosted JARVIS planned for Phases 12-13.
 
 **Monorepo layout:** Next.js web app lives at the repo root; Expo mobile app lives at `apps/mobile/`. They share the same API backend — the web app uses httpOnly cookie auth while the mobile app uses `Authorization: Bearer <jwt>` headers.
 
