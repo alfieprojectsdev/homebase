@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { chores, choreHistory } from '@/lib/db/schema';
 import { getAuthUser } from '@/lib/auth/server';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc, gt } from 'drizzle-orm';
 
 const choreSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or less'),
@@ -31,10 +31,23 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const updatedSinceParam = request.nextUrl.searchParams.get('updatedSince');
+    let updatedSince: Date | undefined;
+    if (updatedSinceParam) {
+      updatedSince = new Date(updatedSinceParam);
+      if (isNaN(updatedSince.getTime())) {
+        return NextResponse.json({ error: 'updatedSince must be a valid ISO date' }, { status: 400 });
+      }
+    }
+
     const allChores = await db
       .select()
       .from(chores)
-      .where(eq(chores.orgId, authUser.orgId))
+      .where(
+        updatedSince
+          ? and(eq(chores.orgId, authUser.orgId), gt(chores.updatedAt, updatedSince))
+          : eq(chores.orgId, authUser.orgId)
+      )
       .orderBy(desc(chores.createdAt));
 
     return NextResponse.json({ chores: allChores });

@@ -189,3 +189,17 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Chores restart (2026-07-16): FCM registration tokens for the native Android
+// delta-sync channel. One row per device — unlike users.expoPushToken (single
+// column, one device per user), a household has multiple Android devices per
+// user (2 parents' phones + hand-me-downs), so this needs to be multi-row.
+export const deviceTokens = pgTable('device_tokens', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  orgId: integer('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  platform: varchar('platform', { length: 20 }).notNull(), // 'fcm' for now
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  lastSeenAt: timestamp('last_seen_at').defaultNow().notNull(),
+});
+
