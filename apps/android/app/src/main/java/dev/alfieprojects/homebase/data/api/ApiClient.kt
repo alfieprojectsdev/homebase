@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import dev.alfieprojects.homebase.data.model.Chore
 import dev.alfieprojects.homebase.data.model.ChoreListResponse
 import dev.alfieprojects.homebase.data.model.ChoreResponse
+import dev.alfieprojects.homebase.data.model.CreateChoreRequest
 import dev.alfieprojects.homebase.data.model.LoginRequest
 import dev.alfieprojects.homebase.data.model.LoginResponse
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,9 @@ class ApiClient(
 
     suspend fun updateProgress(choreId: Int, progress: Int): Chore =
         patch<ChoreResponse>("/api/chores/$choreId", mapOf("progress" to progress)).chore
+
+    suspend fun createChore(request: CreateChoreRequest): Chore =
+        post<ChoreResponse>("/api/chores", request).chore
 
     private suspend inline fun <reified T> get(path: String): T =
         execute(builder(path).get().build())

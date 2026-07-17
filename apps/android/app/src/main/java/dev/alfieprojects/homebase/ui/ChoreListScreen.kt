@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChoreListScreen(
     repo: ChoreRepository,
+    onAddChore: () -> Unit,
     onAuthExpired: () -> Unit,
     onLogout: () -> Unit,
 ) {
@@ -84,6 +85,14 @@ fun ChoreListScreen(
             TextButton(onClick = onLogout, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text("Log out")
             }
+        }
+
+        // ADHD rule: Add Chore is a primary action — prominent, never hidden.
+        Button(
+            onClick = onAddChore,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 4.dp),
+        ) {
+            Text("+ Add Chore")
         }
 
         NotificationPermissionBanner()

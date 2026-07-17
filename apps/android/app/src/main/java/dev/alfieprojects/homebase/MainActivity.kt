@@ -17,6 +17,7 @@ import dev.alfieprojects.homebase.data.ChoreRepository
 import dev.alfieprojects.homebase.data.api.ApiClient
 import dev.alfieprojects.homebase.ui.ChoreListScreen
 import dev.alfieprojects.homebase.ui.LoginScreen
+import dev.alfieprojects.homebase.ui.NewChoreScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,22 +32,28 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     var loggedIn by remember { mutableStateOf(auth.isLoggedIn) }
+                    var addingChore by remember { mutableStateOf(false) }
 
+                    val onAuthExpired = {
+                        auth.logout()
+                        addingChore = false
+                        loggedIn = false
+                    }
 
-                    if (loggedIn) {
-                        ChoreListScreen(
+                    when {
+                        !loggedIn -> LoginScreen(auth = auth, onLoggedIn = { loggedIn = true })
+                        addingChore -> NewChoreScreen(
                             repo = repo,
-                            onAuthExpired = {
-                                auth.logout()
-                                loggedIn = false
-                            },
-                            onLogout = {
-                                auth.logout()
-                                loggedIn = false
-                            },
+                            onCreated = { addingChore = false },
+                            onCancel = { addingChore = false },
+                            onAuthExpired = onAuthExpired,
                         )
-                    } else {
-                        LoginScreen(auth = auth, onLoggedIn = { loggedIn = true })
+                        else -> ChoreListScreen(
+                            repo = repo,
+                            onAddChore = { addingChore = true },
+                            onAuthExpired = onAuthExpired,
+                            onLogout = onAuthExpired,
+                        )
                     }
                 }
             }

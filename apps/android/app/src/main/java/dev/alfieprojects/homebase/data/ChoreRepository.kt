@@ -4,6 +4,7 @@ import android.content.Context
 import dev.alfieprojects.homebase.data.api.ApiClient
 import dev.alfieprojects.homebase.data.db.AppDatabase
 import dev.alfieprojects.homebase.data.model.Chore
+import dev.alfieprojects.homebase.data.model.CreateChoreRequest
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 
@@ -50,6 +51,12 @@ class ChoreRepository(
     suspend fun markDone(choreId: Int) {
         val updated = api.updateProgress(choreId, 100)
         dao.upsertAll(listOf(updated))
+    }
+
+    suspend fun create(request: CreateChoreRequest): Chore {
+        val created = api.createChore(request)
+        dao.upsertAll(listOf(created))
+        return created
     }
 
     private companion object {

@@ -49,6 +49,20 @@ class IntListConverter {
             ?: if (value == "") emptyList() else null
 }
 
+/**
+ * Body for POST /api/chores — matches the route's zod choreSchema
+ * (src/app/api/chores/route.ts): omitted fields take server defaults.
+ * Gson drops nulls by default, so optional fields stay absent when unset.
+ */
+data class CreateChoreRequest(
+    val title: String,
+    val description: String? = null,
+    val reminderEnabled: Boolean = true,
+    val reminderFrequency: String? = null,
+    val activeStartHour: Int? = null,
+    val activeEndHour: Int? = null,
+)
+
 data class ChoreListResponse(val chores: List<Chore>)
 
 data class ChoreResponse(val chore: Chore)
