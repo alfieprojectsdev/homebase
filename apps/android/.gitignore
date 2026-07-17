@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+build/
+app/build/
+
+# Local machine config (SDK path)
+local.properties
+
+# IDE
+.idea/
+*.iml
+
+# Release signing — keystore must NEVER be committed
+# (backed up outside the repo; losing it = uninstall/reinstall on every device)
+*.jks
+*.keystore
+keystore.properties
+
+# FCM config (contains API keys; add when Firebase project exists)
+app/google-services.json
