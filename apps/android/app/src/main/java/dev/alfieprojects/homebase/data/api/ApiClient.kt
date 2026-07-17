@@ -7,6 +7,7 @@ import dev.alfieprojects.homebase.data.model.ChoreResponse
 import dev.alfieprojects.homebase.data.model.CreateChoreRequest
 import dev.alfieprojects.homebase.data.model.LoginRequest
 import dev.alfieprojects.homebase.data.model.LoginResponse
+import dev.alfieprojects.homebase.data.model.SignupRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -38,6 +39,9 @@ class ApiClient(
 
     suspend fun login(email: String, password: String): LoginResponse =
         post("/api/auth/login", LoginRequest(email, password), authenticated = false)
+
+    suspend fun signup(request: SignupRequest): LoginResponse =
+        post("/api/auth/signup", request, authenticated = false)
 
     suspend fun getChores(updatedSince: String? = null): List<Chore> {
         val query = if (updatedSince != null) "?updatedSince=$updatedSince" else ""

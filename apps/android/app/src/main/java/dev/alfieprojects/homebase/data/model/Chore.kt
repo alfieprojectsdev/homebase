@@ -69,6 +69,13 @@ data class ChoreResponse(val chore: Chore)
 
 data class LoginRequest(val email: String, val password: String)
 
+data class SignupRequest(
+    val name: String,
+    val orgName: String,
+    val email: String,
+    val password: String,
+)
+
 data class LoginResponse(val user: ApiUser, val token: String)
 
 data class ApiUser(
