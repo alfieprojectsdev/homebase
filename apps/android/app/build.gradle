@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp'
 }
 
 android {
@@ -59,6 +60,11 @@ dependencies {
 
     // Local-first sync + reminders
     implementation 'androidx.work:work-runtime-ktx:2.9.0'
+
+    // Room — on-device chore cache (single source of truth for UI + reminder engine)
+    implementation 'androidx.room:room-runtime:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
+    ksp            'androidx.room:room-compiler:2.6.1'
 
     // Encrypted JWT storage
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'

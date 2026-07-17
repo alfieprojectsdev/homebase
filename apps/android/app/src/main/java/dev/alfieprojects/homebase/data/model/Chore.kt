@@ -1,12 +1,18 @@
 package dev.alfieprojects.homebase.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
+
 /**
  * Mirrors the `chores` row shape returned by the Next.js API
- * (src/lib/db/schema.ts in the web repo). Timestamps arrive as ISO-8601
- * strings; kept as strings here — parsing happens where needed.
+ * (src/lib/db/schema.ts in the web repo) and doubles as the Room entity —
+ * one class, no mapping layer. Timestamps arrive as ISO-8601 strings; kept
+ * as strings here, parsed where needed.
  */
+@Entity(tableName = "chores")
 data class Chore(
-    val id: Int,
+    @PrimaryKey val id: Int,
     val orgId: Int,
     val residenceId: Int?,
     val title: String,
@@ -32,6 +38,16 @@ data class Chore(
     val createdAt: String,
     val updatedAt: String,
 )
+
+class IntListConverter {
+    @TypeConverter
+    fun fromList(value: List<Int>?): String? = value?.joinToString(",")
+
+    @TypeConverter
+    fun toList(value: String?): List<Int>? =
+        value?.takeIf { it.isNotEmpty() }?.split(",")?.map { it.toInt() }
+            ?: if (value == "") emptyList() else null
+}
 
 data class ChoreListResponse(val chores: List<Chore>)
 

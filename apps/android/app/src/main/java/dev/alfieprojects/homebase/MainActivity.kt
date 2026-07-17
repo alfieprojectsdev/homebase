@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.alfieprojects.homebase.auth.AuthRepository
 import dev.alfieprojects.homebase.auth.TokenStore
+import dev.alfieprojects.homebase.data.ChoreRepository
 import dev.alfieprojects.homebase.data.api.ApiClient
 import dev.alfieprojects.homebase.ui.ChoreListScreen
 import dev.alfieprojects.homebase.ui.LoginScreen
@@ -24,6 +25,7 @@ class MainActivity : ComponentActivity() {
         val tokenStore = TokenStore(applicationContext)
         val api = ApiClient(BuildConfig.API_BASE_URL) { tokenStore.token }
         val auth = AuthRepository(api, tokenStore)
+        val repo = ChoreRepository(applicationContext, api)
 
         setContent {
             MaterialTheme {
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
                     if (loggedIn) {
                         ChoreListScreen(
-                            api = api,
+                            repo = repo,
                             onAuthExpired = {
                                 auth.logout()
                                 loggedIn = false
