@@ -4,6 +4,15 @@ plugins {
     id 'com.google.devtools.ksp'
 }
 
+// Release signing — keystore lives OUTSIDE the repo (~/keystores/), config in
+// gitignored keystore.properties. Losing the keystore means every device must
+// uninstall/reinstall (Android refuses signature changes) — keep it backed up.
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
 android {
     namespace   'dev.alfieprojects.homebase'
     compileSdk   34
@@ -37,10 +46,24 @@ android {
         jvmTarget = '17'
     }
 
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile     file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias      keystoreProps['keyAlias']
+                keyPassword   keystoreProps['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled   true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePropsFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
