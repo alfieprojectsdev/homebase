@@ -407,10 +407,10 @@ Month 6 (Aug 2026):
 - All new tables require `org_id` column
 
 ### Technology Choices (Locked In)
-- **Frontend:** Next.js 14 (web), Expo (mobile) — no Vue, no Flutter
+- **Frontend:** Next.js 14 (web), native Kotlin (Android — `apps/mobile` Expo scaffold parked/superseded, see `docs/HANDOVER-chores-restart-2026-07-16.md`), PWA (iOS) — no Vue, no Flutter
 - **Database:** Neon Postgres (production), SQLite (tests) — no MongoDB, no Firebase
 - **Auth:** Custom JWT (no Auth0, no Firebase Auth)
-- **Notifications:** VAPID Web Push + Expo Push (no Firebase Cloud Messaging SDKs)
+- **Notifications:** VAPID Web Push (web/PWA) + FCM (native Android delta-sync channel only, per `docs/HANDOVER-chores-restart-2026-07-16.md` — local-first `AlarmManager` scheduling does the actual reminder firing; FCM just wakes a resync). No Firebase on web/PWA, no Firebase Auth/Firestore/Analytics anywhere.
 - **Heuristics:** simple-statistics + custom algorithms (no external ML/AI until Phase 12)
 - **Deployment:** Vercel (web), EAS Build (mobile) — no custom servers until Phase 12
 
