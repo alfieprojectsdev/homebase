@@ -127,17 +127,22 @@ An ADHD-friendly household management system that catches important tasks before
 
 ## Platform: Phase 7 — Chores System 🚧
 
-**In progress.** Household task management with gamification.
+**In progress — restarted 2026-07-16 for native Android + PWA clients**
+(see `/docs/HANDOVER-chores-restart-2026-07-16.md` and
+`/docs/SESSION_LOG_2026-07-17.md`).
 
-- Task creation and assignment (to household members)
-- Progress tracking (percentage or step-based)
-- Streak tracking per person (ADHD dopamine boost)
-- Recurring chores with flexible scheduling
-- Leaderboard and completion stats
-- Snoozable/dismissible notifications
-- Feedback system (snooze, reassign, mark complete)
+Done:
+- ✅ Web: CRUD, progress tracking, streaks, leaderboard, feedback, history
+- ✅ Native Android app (`apps/android/`, v0.1.0–v0.3.0 on GitHub Releases):
+  login/signup, chore list (offline Room cache), creation, mark-done, and
+  **local-first reminders** (on-device exact alarms — reminder logic no
+  longer lives server-side)
 
-**Timeline:** Month 3-4 (parallel with Phase 2)
+Remaining:
+- 🗓 PWA pass for kids' iOS devices (offline views, server-sent chore push
+  for ≥16.4 devices, iPhone-7 in-app fallback)
+- 🗓 Android parity: streaks, leaderboard, feedback UI; custom HH:MM times
+- 🗓 Real deployment URL in the APK (currently LAN dev server)
 
 **Learn more:** See `/docs/CHORE-plan.md`
 
@@ -230,7 +235,7 @@ An ADHD-friendly household management system that catches important tasks before
 
 | Phase | Name | Status | Scope |
 |-------|------|--------|-------|
-| M1 | Core Companion | 🚧 | Native iOS/Android, bills + chores, push notifications, offline viewing |
+| M1 | Core Companion | ⏸ | **Superseded** — Expo scaffold parked (`apps/mobile/`); replaced by native Kotlin `apps/android/` (see Phase 7) |
 | M2 | Offline & Caching | 🗓 | SQLite persistence, background sync, conflict resolution |
 | M3 | Smart Notifications | 🗓 | Receipt polling, token lifecycle, escalation UI |
 | M4 | Platform Features | 🗓 | iOS Critical Alerts, home screen widgets, biometric unlock |
@@ -238,9 +243,15 @@ An ADHD-friendly household management system that catches important tasks before
 
 ---
 
-## Mobile: Phase M1 — Core Companion 🚧
+## Mobile: Phase M1 — Core Companion ⏸ (superseded 2026-07-16)
 
-**In progress.** Functional bill + chore tracker with native push notifications.
+**Superseded.** The Expo scaffold below was parked (owner rejected it —
+notification reliability on Samsung One UI requires native exact alarms +
+battery-exemption flows Expo can't provide). The native Kotlin app at
+`apps/android/` replaced it; its scope is tracked under Phase 7. M2–M5
+concepts (offline caching, smart notifications, platform features,
+gamification) carry forward against the native app. Original plan kept
+below for reference.
 
 - Expo SDK 52 + Expo Router (file-based navigation)
 - Authentication via Bearer token (JWT from web API)
@@ -444,5 +455,5 @@ Month 6 (Aug 2026):
 
 ---
 
-**Last Updated:** March 1, 2026
+**Last Updated:** July 17, 2026
 **Next Review:** May 1, 2026

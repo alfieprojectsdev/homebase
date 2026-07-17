@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **⚠ ACTIVE RESTART (2026-07-16): read `docs/HANDOVER-chores-restart-2026-07-16.md` before planning any work.** Chores tracking is being rebuilt for native Kotlin Android (NOT the Expo app in `apps/mobile` — owner rejected it) + PWA for the kids' iOS devices. That handover carries the settled decisions, device constraints, toolchain state, and priority order from the scoping session.
+> **Chores restart (2026-07-16/17): executed.** Native Kotlin Android app lives at `apps/android/` — three signed releases shipped (v0.1.0–v0.3.0, GitHub Releases sideload). The Expo app in `apps/mobile` is **parked/superseded** (owner rejected it — see its README). Decisions record: `docs/HANDOVER-chores-restart-2026-07-16.md`; execution record: `docs/SESSION_LOG_2026-07-17.md`. **No Firebase anywhere** (owner decision) — background delta sync via WorkManager pull, reminders fire from on-device AlarmManager schedules.
 
 ## Project Overview
 
@@ -10,9 +10,9 @@ Homebase is a multi-residence household management system designed for ADHD exec
 
 **Core Philosophy:** "The system catches it, so your brain doesn't have to."
 
-**Current Phase:** Phase M1 (mobile) + Phase 3 planning. Phases 1–2 shipped. Chores (Phase 7) is 🚧: CRUD, feedback, history, streaks, and leaderboard work end-to-end, but reminder notifications are not wired — `sendChoreReminders()` in `src/lib/notifications/chores.ts` is dead code (no cron/route calls it) and only `console.log`s rather than pushing via `WebPushNotifier`/`ExpoPushNotifier`. Self-hosted JARVIS planned for Phases 12-13.
+**Current Phase:** Chores (Phase 7) 🚧 nearly done: web CRUD/feedback/history/streaks/leaderboard work end-to-end, and chore **reminders now fire on-device** in the native Android app (local-first AlarmManager engine — the web-side `sendChoreReminders()` dead code was deleted). Remaining: PWA pass for kids' iOS devices, Android parity features (streaks/leaderboard/feedback UI), real deployment URL. Phases 1–2 shipped. Self-hosted JARVIS planned for Phases 12-13.
 
-**Monorepo layout:** Next.js web app lives at the repo root; Expo mobile app lives at `apps/mobile/`. They share the same API backend — the web app uses httpOnly cookie auth while the mobile app uses `Authorization: Bearer <jwt>` headers.
+**Monorepo layout:** Next.js web app at the repo root; **native Kotlin Android app at `apps/android/`** (active); Expo app at `apps/mobile/` (parked, do not build on). All clients share the same API backend — web uses httpOnly cookie auth, mobile sends `Authorization: Bearer <jwt>`.
 
 ## Tech Stack
 
@@ -25,12 +25,15 @@ Homebase is a multi-residence household management system designed for ADHD exec
 - **Heuristics:** `simple-statistics` + custom algorithms (no external ML)
 - **Deployment:** Vercel with daily cron job at 9 AM
 
-**Mobile (`apps/mobile/`):**
-- **Framework:** Expo SDK 52 (managed workflow) + Expo Router 4 (file-based navigation)
-- **Styling:** NativeWind v4 (Tailwind-like for React Native)
-- **State:** React Query v5 (server state + offline cache)
-- **Storage:** `expo-secure-store` (encrypted JWT), `expo-notifications` (push)
-- **Distribution:** EAS Build → TestFlight (iOS) / APK sideload (Android)
+**Android (`apps/android/` — active):**
+- **Stack:** Kotlin 1.9.23 + Jetpack Compose, AGP 8.3.0, Gradle 8.14.1, compileSdk 34 / minSdk 26, Groovy DSL (modeled on `/home/finch/repos/gearsync/` conventions)
+- **Offline cache:** Room (single source of truth for UI + reminders); WorkManager 15-min delta sync via `GET /api/chores?updatedSince=`
+- **Reminders:** local-first — `setExactAndAllowWhileIdle` alarms scheduled on-device from Room, zero network at fire time; per-category notification channels; boot receiver reschedules
+- **Auth:** Bearer JWT in EncryptedSharedPreferences; bootstrap usernames map to `<username>@homebase.local` (no server changes)
+- **Distribution:** local `./gradlew assembleRelease` → GitHub Releases sideload. Keystore at `~/keystores/homebase-release.jks` + gitignored `apps/android/keystore.properties` — **never lose the keystore** (signature change forces uninstall/reinstall on every device)
+- **No Firebase/FCM** (owner decision 2026-07-17)
+
+**Expo (`apps/mobile/` — parked, superseded):** kept buildable at SDK 52 for reference only; see its README.
 
 ## Development Commands
 
@@ -48,18 +51,22 @@ npm run test:e2e:headed  # Run tests in headed mode
 npm run test:e2e:report  # Show HTML test report
 npx playwright test e2e/bills.spec.ts  # Run a single spec
 
-# Database
-npx drizzle-kit generate:pg    # Generate migration from schema changes
-npx drizzle-kit push:pg        # Push schema to Neon (requires DATABASE_URL)
+# Database — drizzle.config.ts does NOT read .env.local; export first:
+#   set -a; source .env.local; set +a
+npx drizzle-kit generate       # Generate migration from schema changes (generate:pg is deprecated)
+npx drizzle-kit push           # Push schema to Neon (push:pg is deprecated)
 npx tsx src/lib/db/seed.ts     # Seed dev data (test@devfamily.com / password123)
 npx tsx src/lib/db/seed-pelicano-family.ts  # Seed Pelicano family dataset
 npx drizzle-kit studio         # Open Drizzle Studio GUI
 
-# Mobile — run from apps/mobile/
-cd apps/mobile
-npx expo start           # Start Expo dev server (scan QR or press i/a)
-npx expo start --ios     # iOS simulator
-npx expo start --android # Android emulator
+# Android — run from apps/android/ (needs ANDROID_HOME=~/Android/Sdk, java 17)
+cd apps/android
+./gradlew :app:compileDebugKotlin    # Type-check/compile
+./gradlew :app:testDebugUnitTest     # JVM unit tests (ReminderLogic, JSON fixtures, auth mapping)
+./gradlew assembleDebug              # Debug APK (10MB, unsigned-debug)
+./gradlew assembleRelease            # Signed release APK (needs keystore.properties)
+# Release: gh release create vX.Y.Z app/build/outputs/apk/release/app-release.apk
+# No emulator on this machine (by design) — sideload to a physical device.
 ```
 
 ## Project Structure
@@ -103,15 +110,18 @@ middleware.ts                # Route protection (bills, chores, auth/me)
 drizzle.config.ts            # Drizzle config — requires DATABASE_URL env var
 vercel.json                  # Cron schedule: /api/cron/daily at 0 9 * * *
 
-# Mobile (apps/mobile/)
-apps/mobile/
-├── app/
-│   ├── (auth)/              # Login screen
-│   ├── (tabs)/              # Tab navigator: bills/, chores/, settings/
-│   ├── _layout.tsx          # Root layout (auth gate + React Query provider)
-│   └── index.tsx            # Redirect to tabs or login
-├── lib/                     # API clients, auth helpers, query hooks
-└── app.json                 # Expo config (SDK 52, bundleId: com.homebase.mobile)
+# Android (apps/android/) — package dev.alfieprojects.homebase
+apps/android/app/src/main/java/dev/alfieprojects/homebase/
+├── MainActivity.kt          # State-based nav: login → chore list → new chore
+├── HomebaseApp.kt           # Notification channels + periodic SyncWorker enqueue
+├── auth/                    # TokenStore (EncryptedSharedPreferences), AuthRepository (username→email mapping)
+├── data/                    # ApiClient (OkHttp+Gson, Bearer), ChoreRepository (Room = source of truth), db/, model/
+├── reminders/               # ReminderLogic (pure, JVM-tested), ReminderScheduler (AlarmManager),
+│                            # ReminderReceiver (fires + chains), BootReceiver
+├── sync/                    # SyncWorker (15-min delta pull)
+└── ui/                      # LoginScreen (+signup), ChoreListScreen (+reliability banners), NewChoreScreen
+
+# Expo (apps/mobile/) — PARKED, see its README. Do not build on it.
 ```
 
 ## Database Schema
