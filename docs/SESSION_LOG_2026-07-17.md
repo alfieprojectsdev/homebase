@@ -86,3 +86,22 @@ signature, update-in-place):
 `.eslintrc.json`, `CLAUDE.new.md`, `HEXAGONAL_ARCHITECTURE_ANALYSIS.md`,
 `docs/20260330-harness flow.md`, `docs/notif-test-guide.md`,
 `scripts/migrate-production.ts`, `scripts/reset-demo-password.ts`
+
+---
+
+## Addendum 2026-07-18: production provisioning (Neon CLI + Vercel CLI)
+
+- **v0.4.0 released** — APK now points at `https://homebase-blond.vercel.app`
+  (cleartext dropped). App works off-LAN. Accounts made against the LAN dev
+  server live in the dev DB; family should sign up fresh on v0.4.0.
+- **Prod login had been 500ing**: Vercel's Neon **production** branch
+  (project `plain-hill-24100914`, org Alfie) was missing
+  `users.expo_push_token` + `device_tokens` — all prior drizzle pushes had
+  hit the **development** branch (`.env.local`). Fixed via
+  `drizzle-kit push` against the production connection string (neonctl).
+  **Rule going forward: every schema change needs TWO pushes — dev branch
+  (.env.local) AND prod branch (neonctl connection-string production).**
+- **CRON_SECRET** was never set in Vercel — daily 9AM briefing cron had
+  401'd since deployment. Generated, added to prod env, redeployed.
+- Verified on prod: signup → login → Bearer chore create → updatedSince
+  delta sync, all 200. Cron route correctly 401s without the secret.
