@@ -21,12 +21,13 @@ android {
         applicationId  'dev.alfieprojects.homebase'
         minSdk          26
         targetSdk       34
-        versionCode     3
-        versionName    '0.3.0'
+        versionCode     4
+        versionName    '0.4.0'
 
-        // Next.js backend. Dev default is the LAN address of the dev server;
-        // override per build as the deployment URL settles.
-        buildConfigField 'String', 'API_BASE_URL', '"http://192.168.48.120:3000"'
+        // Production deployment (Vercel). For LAN dev testing, point at the
+        // dev server instead: http://192.168.48.120:3000 (needs
+        // usesCleartextTraffic re-enabled in the manifest).
+        buildConfigField 'String', 'API_BASE_URL', '"https://homebase-blond.vercel.app"'
     }
 
     buildFeatures {

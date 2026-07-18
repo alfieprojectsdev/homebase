@@ -14,11 +14,7 @@
         android:name=".HomebaseApp"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
-        android:allowBackup="true"
-        android:usesCleartextTraffic="true">
-        <!-- usesCleartextTraffic: dev server is plain http on the LAN; API 28+
-             blocks cleartext by default. Scope down to a network-security-config
-             once a real https deployment URL is baked in. -->
+        android:allowBackup="true">
 
         <activity
             android:name=".MainActivity"
