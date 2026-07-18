@@ -10,7 +10,7 @@ Homebase is a multi-residence household management system designed for ADHD exec
 
 **Core Philosophy:** "The system catches it, so your brain doesn't have to."
 
-**Current Phase:** Chores (Phase 7) 🚧 nearly done: web CRUD/feedback/history/streaks/leaderboard work end-to-end, and chore **reminders now fire on-device** in the native Android app (local-first AlarmManager engine — the web-side `sendChoreReminders()` dead code was deleted). Remaining: PWA pass for kids' iOS devices, Android parity features (streaks/leaderboard/feedback UI), real deployment URL. Phases 1–2 shipped. Self-hosted JARVIS planned for Phases 12-13.
+**Current Phase:** Chores (Phase 7) 🚧 nearly done: web CRUD/feedback/history/streaks/leaderboard work end-to-end; chore **reminders fire on-device** in the native Android app (local-first AlarmManager engine), and **PWA web-push reminders + offline chore views shipped 2026-07-18** for the kids' iOS devices (see Notifications section). Production is live at `https://homebase-blond.vercel.app` (baked into APK v0.4.0). Remaining: on-device validation (Android + iOS), Android parity features (streaks/leaderboard/feedback UI), custom HH:MM reminder times UI. Phases 1–2 shipped. Self-hosted JARVIS planned for Phases 12-13.
 
 **Monorepo layout:** Next.js web app at the repo root; **native Kotlin Android app at `apps/android/`** (active); Expo app at `apps/mobile/` (parked, do not build on). All clients share the same API backend — web uses httpOnly cookie auth, mobile sends `Authorization: Bearer <jwt>`.
 
@@ -209,6 +209,13 @@ VAPID_SUBJECT="mailto:..."   # optional, defaults to mailto:support@homebase.app
 ```
 
 Flow: `POST /api/notifications/subscribe` saves endpoint → daily cron sends via `NotificationService.sendWebPush()` → logged to `notification_logs`. SMS is stubbed (deferred).
+
+**Chore reminders (per client, since 2026-07-18):**
+- **Android app**: on-device AlarmManager scheduling — never touches the server at fire time.
+- **PWA / web-push subscribers**: `/api/cron/chore-reminders` (CRON_SECRET-gated) evaluates eligibility server-side via `src/lib/notifications/chore-reminders.ts` — semantics mirror the Android `ReminderLogic` (frequency legs, active-hours window in `REMINDER_TZ`, default `Asia/Manila`; null frequency → never). Triggered every 15 min by `.github/workflows/chore-reminders.yml` (Vercel Hobby crons are daily-only; needs repo secret `CRON_SECRET` matching the Vercel env var). Recipients: `assignedTo`, else creator.
+- **Offline PWA**: `public/sw.js` caches navigations + `GET /api/chores*` network-first (view-only offline; full offline sync is Phase 4). SW registers globally via `src/components/SwRegister.tsx`; the root layout links `manifest.json` + apple-touch-icon (required for iOS home-screen install).
+
+**Production:** `https://homebase-blond.vercel.app` (Vercel project `homebase`, auto-deploys from main). Neon project `plain-hill-24100914` has TWO branches — `.env.local` points at `development`; Vercel uses `production`. **Every schema change needs a second push:** `DATABASE_URL=$(npx neonctl connection-string production --project-id plain-hill-24100914 --org-id org-soft-bonus-62372538 --pooled) npx drizzle-kit push`.
 
 ## Recurrence System
 

@@ -138,11 +138,16 @@ Done:
   **local-first reminders** (on-device exact alarms — reminder logic no
   longer lives server-side)
 
+- ✅ Production live: `https://homebase-blond.vercel.app` (in APK from
+  v0.4.0); prod Neon branch schema repaired; CRON_SECRET set (2026-07-18)
+- ✅ PWA pass (2026-07-18): offline chore views (SW cache), web-push chore
+  reminders via `/api/cron/chore-reminders` + 15-min GitHub Actions
+  trigger, manifest/apple-touch-icon finally linked for iOS install
+
 Remaining:
-- 🗓 PWA pass for kids' iOS devices (offline views, server-sent chore push
-  for ≥16.4 devices, iPhone-7 in-app fallback)
+- 🗓 On-device validation: Android (A07/A56) reminder fire-through-Doze
+  test; iOS ≥16.4 install + push subscribe on the kids' devices
 - 🗓 Android parity: streaks, leaderboard, feedback UI; custom HH:MM times
-- 🗓 Real deployment URL in the APK (currently LAN dev server)
 
 **Learn more:** See `/docs/CHORE-plan.md`
 
@@ -455,5 +460,5 @@ Month 6 (Aug 2026):
 
 ---
 
-**Last Updated:** July 17, 2026
+**Last Updated:** July 18, 2026
 **Next Review:** May 1, 2026

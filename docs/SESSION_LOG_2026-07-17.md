@@ -105,3 +105,33 @@ signature, update-in-place):
   401'd since deployment. Generated, added to prod env, redeployed.
 - Verified on prod: signup → login → Bearer chore create → updatedSince
   delta sync, all 200. Cron route correctly 401s without the secret.
+
+---
+
+## Addendum 2026-07-18 (2): PWA pass — offline views + web-push chore reminders
+
+Commit `820f28d`, deployed to prod, endpoint verified live.
+
+- **Offline (view-only)**: `public/sw.js` rewritten — navigations +
+  `GET /api/chores*` network-first with cache fallback; hashed static assets
+  cache-first; Phase-2 push display handlers unchanged. Global silent SW
+  registration (`src/components/SwRegister.tsx`) on every page. Root layout
+  finally links `manifest.json` + apple-touch-icon/appleWebApp meta — iOS
+  home-screen install had been broken (manifest existed, was never linked).
+- **Chore reminders over web push** (kids' iOS ≥16.4): eligibility in
+  `src/lib/notifications/chore-reminders.ts` mirrors Android `ReminderLogic`
+  (frequency legs, active-hours in REMINDER_TZ=Asia/Manila, null → never).
+  Recipients = assignedTo, else creator. Sends via existing VAPID service,
+  logs to notification_logs, advances lastReminderSentAt even with zero
+  subscribers (prevents perpetual re-trigger). Route:
+  `/api/cron/chore-reminders`, CRON_SECRET-gated. Trigger:
+  `.github/workflows/chore-reminders.yml` every 15 min (Vercel Hobby crons
+  daily-only).
+- **Verified on prod**: 401 without secret; 200 with secret
+  (`checked:6 sent:0` — no push subscribers yet, correct).
+- **Owner actions pending**: (1) `gh secret set CRON_SECRET` on
+  alfieprojectsdev/homebase (value = Vercel prod env; command was posted in
+  session), (2) `gh workflow run chore-reminders.yml` to prove the GHA path,
+  (3) kids' device onboarding: iOS ≥16.4 → Safari → Add to Home Screen →
+  login → Settings → Enable Push Notifications.
+- Android app unaffected — never depends on this path.
